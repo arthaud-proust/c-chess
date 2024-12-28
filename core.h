@@ -27,24 +27,24 @@
 
 typedef enum {
     NONE = 0,
-    WHITE,
+    WHITE = 2,
     BLACK,
 } Color;
 
 typedef enum {
-    EMPTY = 0,
-    WHITE_KING,
-    WHITE_QUEEN,
-    WHITE_BISHOP,
-    WHITE_ROCK,
-    WHITE_KNIGHT,
-    WHITE_PAWN,
-    BLACK_KING,
-    BLACK_QUEEN,
-    BLACK_BISHOP,
-    BLACK_ROCK,
-    BLACK_KNIGHT,
-    BLACK_PAWN,
+    __ = 0,
+    WK = 4, // White King
+    WQ, // White Queen
+    WB, // White Bishop
+    WR, // White Rock
+    WN, // White Knight
+    WP, // White Pawn
+    BK, // Black King
+    BQ, // Black Queen
+    BB, // Black Bishop
+    BR, // Black Rock
+    BN, // Black Knight
+    BP, // Black Pawn
 } Piece;
 
 extern const int ROWS;
@@ -80,10 +80,20 @@ Color pieceColor(const Piece piece);
 
 void moveTo(Piece board[COLS][ROWS], const Position origin, const Position destination);
 
+Piece pieceAtColRow(Piece board[COLS][ROWS], const int col, const int row);
+
 Piece pieceAt(Piece board[COLS][ROWS], const Position position);
+
+bool emptyAtColRow(Piece board[COLS][ROWS], const int col, const int row);
 
 bool emptyAt(Piece board[COLS][ROWS], const Position position);
 
+bool isColumnEmptyOnRange(Piece board[COLS][ROWS], const Position start, const Position end);
+
 bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Position origin, const Position destination);
+
+void constructBoard(Piece board[COLS][ROWS]);
+
+void fillBoardWithInitialPieces(Piece board[COLS][ROWS]);
 
 #endif //CORE_H

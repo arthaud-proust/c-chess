@@ -4,31 +4,31 @@
 
 const char *pieceIcon(const Piece piece) {
     switch (piece) {
-        case WHITE_KING:
+        case WK:
             return "♔";
-        case WHITE_QUEEN:
+        case WQ:
             return "♕";
-        case WHITE_BISHOP:
+        case WB:
             return "♗";
-        case WHITE_ROCK:
+        case WR:
             return "♖";
-        case WHITE_KNIGHT:
+        case WN:
             return "♘";
-        case WHITE_PAWN:
+        case WP:
             return "♙";
-        case BLACK_KING:
+        case BK:
             return "♚";
-        case BLACK_QUEEN:
+        case BQ:
             return "♛";
-        case BLACK_BISHOP:
+        case BB:
             return "♝";
-        case BLACK_ROCK:
+        case BR:
             return "♜";
-        case BLACK_KNIGHT:
+        case BN:
             return "♞";
-        case BLACK_PAWN:
+        case BP:
             return "♟";
-        case EMPTY:
+        case __:
             return " ";
     }
     return " ";
@@ -44,38 +44,6 @@ void renderBoard(Piece board[COLS][ROWS]) {
     printf("\n    a   b   c   d   e   f   g   h");
 }
 
-void setupBoard(Piece board[COLS][ROWS]) {
-    for (int col = 0; col < COLS; col++) {
-        for (int row = 0; row < ROWS; row++) {
-            board[row][col] = EMPTY;
-        }
-    }
-
-    board[0][0] = WHITE_ROCK;
-    board[1][0] = WHITE_KNIGHT;
-    board[2][0] = WHITE_BISHOP;
-    board[4][0] = WHITE_QUEEN;
-    board[3][0] = WHITE_KING;
-    board[5][0] = WHITE_BISHOP;
-    board[6][0] = WHITE_KNIGHT;
-    board[7][0] = WHITE_ROCK;
-    for (int row = 0; row < ROWS; row++) {
-        board[row][1] = WHITE_PAWN;
-    }
-
-    board[0][7] = BLACK_ROCK;
-    board[1][7] = BLACK_KNIGHT;
-    board[2][7] = BLACK_BISHOP;
-    board[4][7] = BLACK_QUEEN;
-    board[3][7] = BLACK_KING;
-    board[5][7] = BLACK_BISHOP;
-    board[6][7] = BLACK_KNIGHT;
-    board[7][7] = BLACK_ROCK;
-    for (int row = 0; row < ROWS; row++) {
-        board[row][6] = BLACK_PAWN;
-    }
-}
-
 Position positionFromStr(const char str[2]) {
     const Position position = {
         (int) str[0] - ASCII_LOWER_A,
@@ -89,7 +57,7 @@ int main(void) {
     Color currentPlayer = WHITE;
 
     Piece board[COLS][ROWS];
-    setupBoard(board);
+    fillBoardWithInitialPieces(board);
 
     while (true) {
         renderBoard(board);
