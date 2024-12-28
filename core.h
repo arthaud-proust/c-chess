@@ -92,6 +92,8 @@ bool isColumnEmptyBetween(Piece board[COLS][ROWS], const Position start, const P
 
 bool isRowEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end);
 
+bool isDiagonalEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end);
+
 bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Position origin, const Position destination);
 
 void constructBoard(Piece board[COLS][ROWS]);

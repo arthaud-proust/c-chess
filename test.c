@@ -19,8 +19,7 @@ Position positionOfPiece(Piece movesBoard[COLS][ROWS], const Piece piece) {
 }
 
 void ASSERT_VALID_MOVES_MATCH(Piece board[COLS][ROWS], const Color player, const Position pieceToMove, bool validMoves[COLS][ROWS]) {
-    REQUIRE_NE(pieceToMove.col, -1);
-    REQUIRE_NE(pieceToMove.row, -1);
+    REQUIRE_TRUE(pieceToMove.col > -1 && pieceToMove.row > -1, "Piece not found");
 
     for (int col = 0; col < COLS; col++) {
         for (int row = 0; row < ROWS; row++) {
@@ -154,7 +153,64 @@ TEST(isRowEmptyBetween, return_false_if_piece_between_start_and_end) {
     CHECK_FALSE(isRowEmptyBetween(board, end, start));
 }
 
-TEST(basic, cannot_move_other_player_piece) {
+TEST(isDiagonalEmptyBetween, return_false_if_not_same_diagonal) {
+    Piece board[8][8] = {
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+
+    const Position start = {0, 0};
+    const Position end = {1, 0};
+
+    CHECK_FALSE(isDiagonalEmptyBetween(board, start, end));
+    CHECK_FALSE(isDiagonalEmptyBetween(board, end, start));
+}
+
+TEST(isDiagonalEmptyBetween, return_true_if_no_piece_between_start_and_end) {
+    Piece board[8][8] = {
+        {WP, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, WP, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+
+    const Position start = {0, 0};
+    const Position end = {2, 2};
+
+    CHECK_TRUE(isDiagonalEmptyBetween(board, start, end));
+    CHECK_TRUE(isDiagonalEmptyBetween(board, end, start));
+}
+
+TEST(isDiagonalEmptyBetween, return_false_if_piece_between_start_and_end) {
+    Piece board[8][8] = {
+        {WP, __, __, __, __, __, __, __},
+        {__, WP, __, __, __, __, __, __},
+        {__, __, WP, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+
+    const Position start = {0, 0};
+    const Position end = {2, 2};
+
+    CHECK_FALSE(isDiagonalEmptyBetween(board, start, end));
+    CHECK_FALSE(isDiagonalEmptyBetween(board, end, start));
+}
+
+TEST(all, cannot_move_other_player_piece) {
     Piece board[8][8] = {
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
@@ -181,7 +237,7 @@ TEST(basic, cannot_move_other_player_piece) {
     ASSERT_VALID_MOVES_MATCH(board, BLACK, pieceToMove, validMoves);
 }
 
-TEST(basic, cannot_move_piece_on_another_if_same_colour) {
+TEST(all, cannot_move_piece_on_another_if_same_colour) {
     Piece board[8][8] = {
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
@@ -208,7 +264,7 @@ TEST(basic, cannot_move_piece_on_another_if_same_colour) {
     ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
 }
 
-TEST(basic, cannot_move_piece_out_of_board) {
+TEST(all, cannot_move_piece_out_of_board) {
     Piece board[8][8] = {
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
@@ -240,7 +296,7 @@ TEST(basic, cannot_move_piece_out_of_board) {
     );
 }
 
-TEST(pawn, white_pawn_can_move_1_cell_front_when_not_at_start_row) {
+TEST(pawn, white_can_move_1_cell_front_when_not_at_start_row) {
     Piece board[8][8] = {
         {__, __, WP, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
@@ -267,7 +323,7 @@ TEST(pawn, white_pawn_can_move_1_cell_front_when_not_at_start_row) {
     ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
 }
 
-TEST(pawn, white_pawn_can_move_1_or_2_cells_front_when_at_start_row) {
+TEST(pawn, white_can_move_1_or_2_cells_front_when_at_start_row) {
     Piece board[8][8] = {
         {__, WP, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
@@ -294,7 +350,7 @@ TEST(pawn, white_pawn_can_move_1_or_2_cells_front_when_at_start_row) {
     ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
 }
 
-TEST(pawn, white_pawn_cannot_move_2_cells_front_when_piece_in_front_of_it) {
+TEST(pawn, white_cannot_move_2_cells_front_when_piece_in_front_of_it) {
     Piece board[8][8] = {
         {__, WP, BP, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
@@ -321,7 +377,7 @@ TEST(pawn, white_pawn_cannot_move_2_cells_front_when_piece_in_front_of_it) {
     ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
 }
 
-TEST(pawn, white_pawn_can_eat_at_front_left_or_front_right) {
+TEST(pawn, white_can_eat_at_front_left_or_front_right) {
     Piece board[8][8] = {
         {__, __, __, BP, __, __, __, __},
         {__, __, WP, BP, __, __, __, __},
@@ -348,7 +404,7 @@ TEST(pawn, white_pawn_can_eat_at_front_left_or_front_right) {
     ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
 }
 
-TEST(pawn, black_pawn_can_move_1_cell_front_when_not_at_start_row) {
+TEST(pawn, black_can_move_1_cell_front_when_not_at_start_row) {
     Piece board[8][8] = {
         {__, __, __, __, __, BP, __, __},
         {__, __, __, __, __, __, __, __},
@@ -375,7 +431,7 @@ TEST(pawn, black_pawn_can_move_1_cell_front_when_not_at_start_row) {
     ASSERT_VALID_MOVES_MATCH(board, BLACK, pieceToMove, validMoves);
 }
 
-TEST(pawn, black_pawn_can_move_1_or_2_cells_front_when_at_start_row) {
+TEST(pawn, black_can_move_1_or_2_cells_front_when_at_start_row) {
     Piece board[8][8] = {
         {__, __, __, __, __, __, BP, __},
         {__, __, __, __, __, __, __, __},
@@ -402,7 +458,7 @@ TEST(pawn, black_pawn_can_move_1_or_2_cells_front_when_at_start_row) {
     ASSERT_VALID_MOVES_MATCH(board, BLACK, pieceToMove, validMoves);
 }
 
-TEST(pawn, black_pawn_cannot_move_2_cells_front_when_piece_in_front_of_it) {
+TEST(pawn, black_cannot_move_2_cells_front_when_piece_in_front_of_it) {
     Piece board[8][8] = {
         {__, __, __, __, __, WP, BP, __},
         {__, __, __, __, __, __, __, __},
@@ -429,7 +485,7 @@ TEST(pawn, black_pawn_cannot_move_2_cells_front_when_piece_in_front_of_it) {
     ASSERT_VALID_MOVES_MATCH(board, BLACK, pieceToMove, validMoves);
 }
 
-TEST(pawn, black_pawn_can_eat_at_front_left_or_front_right) {
+TEST(pawn, black_can_eat_at_front_left_or_front_right) {
     Piece board[8][8] = {
         {__, __, __, __, WP, __, __, __},
         {__, __, __, __, WP, BP, __, __},
@@ -456,7 +512,7 @@ TEST(pawn, black_pawn_can_eat_at_front_left_or_front_right) {
     ASSERT_VALID_MOVES_MATCH(board, BLACK, pieceToMove, validMoves);
 }
 
-TEST(knight, knight_can_move_in_l_shape) {
+TEST(knight, can_move_in_l_shape) {
     Piece board[8][8] = {
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
@@ -483,7 +539,7 @@ TEST(knight, knight_can_move_in_l_shape) {
     ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
 }
 
-TEST(king, knight_can_move_in_any_direction_at_distance_of_1) {
+TEST(king, can_move_in_any_direction_at_distance_of_1) {
     Piece board[8][8] = {
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
@@ -510,7 +566,7 @@ TEST(king, knight_can_move_in_any_direction_at_distance_of_1) {
     ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
 }
 
-TEST(rock, rock_can_move_in_column_or_row_at_any_distance) {
+TEST(rock, can_move_in_column_or_row_at_any_distance) {
     Piece board[8][8] = {
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
@@ -537,7 +593,7 @@ TEST(rock, rock_can_move_in_column_or_row_at_any_distance) {
     ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
 }
 
-TEST(rock, rock_cannot_go_over_pieces) {
+TEST(rock, cannot_go_over_pieces) {
     Piece board[8][8] = {
         {__, __, __, __, __, __, __, __},
         {__, __, __, BP, __, __, __, __},
@@ -557,6 +613,60 @@ TEST(rock, rock_cannot_go_over_pieces) {
         {0, 1, 1, 0, 1, 1, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+}
+
+TEST(bishop, can_move_in_diagonal_at_any_distance) {
+    Piece board[8][8] = {
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, WB, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+    const Position pieceToMove = positionOfPiece(board, WB);
+
+    bool validMoves[8][8] = {
+        {1, 0, 0, 0, 0, 0, 1, 0},
+        {0, 1, 0, 0, 0, 1, 0, 0},
+        {0, 0, 1, 0, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 0, 1, 0, 0, 0},
+        {0, 1, 0, 0, 0, 1, 0, 0},
+        {1, 0, 0, 0, 0, 0, 1, 0},
+        {0, 0, 0, 0, 0, 0, 0, 1},
+    };
+
+    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+}
+
+TEST(bishop, cannot_go_over_pieces) {
+    Piece board[8][8] = {
+        {__, __, __, __, __, __, __, __},
+        {__, BP, __, __, __, BP, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, WB, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, BP, __, __, __, BP, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+    const Position pieceToMove = positionOfPiece(board, WB);
+
+    bool validMoves[8][8] = {
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 1, 0, 0},
+        {0, 0, 1, 0, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 0, 1, 0, 0, 0},
+        {0, 1, 0, 0, 0, 1, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
     };

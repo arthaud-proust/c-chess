@@ -125,17 +125,12 @@ bool isColumnEmptyBetween(Piece board[COLS][ROWS], const Position start, const P
         return false;
     }
 
-    if (start.row <= end.row) {
-        for (int row = start.row + 1; row < end.row; row++) {
-            if (pieceAtColRow(board, start.col, row)) {
-                return false;
-            }
-        }
-    } else {
-        for (int row = end.row + 1; row < start.row; row++) {
-            if (pieceAtColRow(board, start.col, row)) {
-                return false;
-            }
+    const int rowStart = start.row <= end.row ? start.row : end.row;
+    const int rowEnd = start.row <= end.row ? end.row : start.row;
+
+    for (int row = rowStart + 1; row < rowEnd; row++) {
+        if (pieceAtColRow(board, start.col, row)) {
+            return false;
         }
     }
 
@@ -147,15 +142,32 @@ bool isRowEmptyBetween(Piece board[COLS][ROWS], const Position start, const Posi
         return false;
     }
 
-    if (start.col <= end.col) {
-        for (int col = start.col + 1; col < end.col; col++) {
-            if (pieceAtColRow(board, col, start.row)) {
-                return false;
-            }
+    const int colStart = start.col <= end.col ? start.col : end.col;
+    const int colEnd = start.col <= end.col ? end.col : start.col;
+
+    for (int col = colStart + 1; col < colEnd; col++) {
+        if (pieceAtColRow(board, col, start.row)) {
+            return false;
         }
-    } else {
-        for (int col = end.col + 1; col < start.col; col++) {
-            if (pieceAtColRow(board, col, start.row)) {
+    }
+
+    return true;
+}
+
+bool isDiagonalEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end) {
+    if (rowsBetween(start, end) != colsBetween(start, end)) {
+        return false;
+    }
+
+    const int colStart = start.col <= end.col ? start.col : end.col;
+    const int colEnd = start.col <= end.col ? end.col : start.col;
+
+    const int rowStart = start.row <= end.row ? start.row : end.row;
+    const int rowEnd = start.row <= end.row ? end.row : start.row;
+
+    for (int col = colStart + 1; col < colEnd; col++) {
+        for (int row = rowStart + 1; row < rowEnd; row++) {
+            if (pieceAtColRow(board, col, row)) {
                 return false;
             }
         }
@@ -229,6 +241,10 @@ bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Po
 
     if (pieceAtOrigin == WR || pieceAtOrigin == BR) {
         return isRowEmptyBetween(board, origin, destination) || isColumnEmptyBetween(board, origin, destination);
+    }
+
+    if (pieceAtOrigin == WB || pieceAtOrigin == BB) {
+        return isDiagonalEmptyBetween(board, origin, destination);
     }
 
     return false;
