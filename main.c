@@ -1,6 +1,7 @@
 #include <iso646.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 // Play to chess in terminal
 
@@ -63,7 +64,6 @@ bool areSamePositions(const Position a, const Position b) {
     return a.col == b.col && a.row == b.row;
 }
 
-
 Position withSameRow(const Position position, const int col) {
     const Position newPosition = {
         col,
@@ -116,6 +116,14 @@ Position atRightOf(const Position position, const int distance) {
     };
 
     return newPosition;
+}
+
+int rowsBetween(const Position a, const Position b) {
+    return abs(a.row - b.row);
+}
+
+int colsBetween(const Position a, const Position b) {
+    return abs(a.col - b.col);
 }
 
 Color pieceColor(const Piece piece) {
@@ -196,7 +204,7 @@ bool emptyAt(Piece board[COLS][ROWS], const Position position) {
 }
 
 
-bool canMovePieceTo(Piece board[COLS][ROWS], Color currentPlayer, const Position origin, const Position destination) {
+bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Position origin, const Position destination) {
     const Piece pieceAtOrigin = pieceAt(board, origin);
     const Color pieceColorAtOrigin = pieceColor(pieceAtOrigin);
     const Piece pieceAtDestination = pieceAt(board, destination);
@@ -232,6 +240,11 @@ bool canMovePieceTo(Piece board[COLS][ROWS], Color currentPlayer, const Position
             return true;
         }
         return areSamePositions(destination, atBottomOf(origin, 1));
+    }
+
+    if (pieceAtOrigin == BLACK_KNIGHT || pieceAtOrigin == WHITE_KNIGHT) {
+        return (rowsBetween(origin, destination) == 2 && colsBetween(origin, destination) == 1)
+               || (rowsBetween(origin, destination) == 1 && colsBetween(origin, destination) == 2);
     }
 
     return false;
