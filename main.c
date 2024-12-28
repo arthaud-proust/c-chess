@@ -247,6 +247,10 @@ bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Po
                || (rowsBetween(origin, destination) == 1 && colsBetween(origin, destination) == 2);
     }
 
+    if (pieceAtOrigin == BLACK_KING || pieceAtOrigin == WHITE_KING) {
+        return rowsBetween(origin, destination) <= 1 && colsBetween(origin, destination) <= 1;
+    }
+
     return false;
 }
 
