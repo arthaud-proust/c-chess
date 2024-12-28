@@ -223,6 +223,11 @@ bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Po
     }
 
     if (pieceAtOrigin == WHITE_PAWN) {
+        if (pieceAtDestination) {
+            return areSamePositions(destination, atLeftOf(atTopOf(origin, 1), 1))
+                   || areSamePositions(destination, atRightOf(atTopOf(origin, 1), 1));
+        }
+
         if (
             origin.row == 1
             && areSamePositions(destination, atTopOf(origin, 2))
@@ -233,9 +238,14 @@ bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Po
     }
 
     if (pieceAtOrigin == BLACK_PAWN) {
+        if (pieceAtDestination) {
+            return areSamePositions(destination, atLeftOf(atBottomOf(origin, 1), 1))
+                   || areSamePositions(destination, atRightOf(atBottomOf(origin, 1), 1));
+        }
+
         if (
-            origin.row == 7
-            && areSamePositions(destination, atTopOf(origin, 2))
+            origin.row == 6
+            && areSamePositions(destination, atBottomOf(origin, 2))
         ) {
             return true;
         }
