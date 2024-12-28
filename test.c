@@ -673,3 +673,57 @@ TEST(bishop, cannot_go_over_pieces) {
 
     ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
 }
+
+TEST(queen, can_move_in_column_or_row_or_diagonal_at_any_distance) {
+    Piece board[8][8] = {
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, WQ, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+    const Position pieceToMove = positionOfPiece(board, WQ);
+
+    bool validMoves[8][8] = {
+        {1, 0, 0, 1, 0, 0, 1, 0},
+        {0, 1, 0, 1, 0, 1, 0, 0},
+        {0, 0, 1, 1, 1, 0, 0, 0},
+        {1, 1, 1, 0, 1, 1, 1, 1},
+        {0, 0, 1, 1, 1, 0, 0, 0},
+        {0, 1, 0, 1, 0, 1, 0, 0},
+        {1, 0, 0, 1, 0, 0, 1, 0},
+        {0, 0, 0, 1, 0, 0, 0, 1},
+    };
+
+    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+}
+
+TEST(queen, cannot_go_over_pieces) {
+    Piece board[8][8] = {
+        {__, __, __, __, __, __, __, __},
+        {__, BP, __, BP, __, BP, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, BP, __, WQ, __, BP, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, BP, __, BP, __, BP, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+    const Position pieceToMove = positionOfPiece(board, WQ);
+
+    bool validMoves[8][8] = {
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 1, 0, 1, 0, 0},
+        {0, 0, 1, 1, 1, 0, 0, 0},
+        {0, 1, 1, 0, 1, 1, 0, 0},
+        {0, 0, 1, 1, 1, 0, 0, 0},
+        {0, 1, 0, 1, 0, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+}

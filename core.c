@@ -240,11 +240,18 @@ bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Po
     }
 
     if (pieceAtOrigin == WR || pieceAtOrigin == BR) {
-        return isRowEmptyBetween(board, origin, destination) || isColumnEmptyBetween(board, origin, destination);
+        return isRowEmptyBetween(board, origin, destination)
+               || isColumnEmptyBetween(board, origin, destination);
     }
 
     if (pieceAtOrigin == WB || pieceAtOrigin == BB) {
         return isDiagonalEmptyBetween(board, origin, destination);
+    }
+
+    if (pieceAtOrigin == WQ || pieceAtOrigin == BQ) {
+        return isRowEmptyBetween(board, origin, destination)
+               || isColumnEmptyBetween(board, origin, destination)
+               || isDiagonalEmptyBetween(board, origin, destination);
     }
 
     return false;
