@@ -3,4 +3,5 @@ project(chess C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(chess main.c)
+add_executable(chess main.c
+        core.c)
