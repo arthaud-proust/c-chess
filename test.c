@@ -40,7 +40,7 @@ void ASSERT_VALID_MOVES_MATCH(Piece board[COLS][ROWS], const Color player, const
     }
 }
 
-TEST(isColumnEmptyOnRange, return_false_if_not_same_column) {
+TEST(isColumnEmptyBetween, return_false_if_not_same_column) {
     Piece board[8][8] = {
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
@@ -55,32 +55,91 @@ TEST(isColumnEmptyOnRange, return_false_if_not_same_column) {
     const Position start = {0, 0};
     const Position end = {1, 0};
 
-    CHECK_FALSE(isColumnEmptyOnRange(board, start, end));
+    CHECK_FALSE(isColumnEmptyBetween(board, start, end));
+    CHECK_FALSE(isColumnEmptyBetween(board, end, start));
 }
 
-TEST(isColumnEmptyOnRange, return_false_piece_in_the_range) {
+TEST(isColumnEmptyBetween, return_true_if_no_piece_between_start_and_end) {
     Piece board[8][8] = {
+        {WP, __, WP, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+
+    const Position start = {0, 0};
+    const Position end = {0, 2};
+
+    CHECK_TRUE(isColumnEmptyBetween(board, start, end));
+    CHECK_TRUE(isColumnEmptyBetween(board, end, start));
+}
+
+TEST(isColumnEmptyBetween, return_false_if_piece_between_start_and_end) {
+    Piece board[8][8] = {
+        {WP, WP, WP, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+
+    const Position start = {0, 0};
+    const Position end = {0, 2};
+
+    CHECK_FALSE(isColumnEmptyBetween(board, start, end));
+    CHECK_FALSE(isColumnEmptyBetween(board, end, start));
+}
+
+TEST(isRowEmptyBetween, return_false_if_not_same_row) {
+    Piece board[8][8] = {
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+
+    const Position start = {0, 0};
+    const Position end = {0, 2};
+
+    CHECK_FALSE(isRowEmptyBetween(board, start, end));
+    CHECK_FALSE(isRowEmptyBetween(board, end, start));
+}
+
+TEST(isRowEmptyBetween, return_true_if_no_piece_between_start_and_end) {
+    Piece board[8][8] = {
+        {WP, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
         {WP, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
     };
 
     const Position start = {0, 0};
-    const Position end = {0, 1};
+    const Position end = {2, 0};
 
-    CHECK_FALSE(isColumnEmptyOnRange(board, start, end));
+    CHECK_TRUE(isRowEmptyBetween(board, start, end));
+    CHECK_TRUE(isRowEmptyBetween(board, end, start));
 }
 
-TEST(isColumnEmptyOnRange, return_true_if_no_piece_in_the_range) {
+TEST(isRowEmptyBetween, return_false_if_piece_between_start_and_end) {
     Piece board[8][8] = {
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
+        {WP, __, __, __, __, __, __, __},
+        {WP, __, __, __, __, __, __, __},
+        {WP, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
@@ -89,9 +148,10 @@ TEST(isColumnEmptyOnRange, return_true_if_no_piece_in_the_range) {
     };
 
     const Position start = {0, 0};
-    const Position end = {0, 1};
+    const Position end = {2, 0};
 
-    CHECK_TRUE(isColumnEmptyOnRange(board, start, end));
+    CHECK_FALSE(isRowEmptyBetween(board, start, end));
+    CHECK_FALSE(isRowEmptyBetween(board, end, start));
 }
 
 TEST(basic, cannot_move_other_player_piece) {
@@ -416,6 +476,87 @@ TEST(knight, knight_can_move_in_l_shape) {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 0, 0, 1, 0, 0},
         {0, 0, 1, 0, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+}
+
+TEST(king, knight_can_move_in_any_direction_at_distance_of_1) {
+    Piece board[8][8] = {
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, WK, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+    const Position pieceToMove = positionOfPiece(board, WK);
+
+    bool validMoves[8][8] = {
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 1, 1, 0, 0, 0},
+        {0, 0, 1, 0, 1, 0, 0, 0},
+        {0, 0, 1, 1, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+}
+
+TEST(rock, rock_can_move_in_column_or_row_at_any_distance) {
+    Piece board[8][8] = {
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, WR, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+    const Position pieceToMove = positionOfPiece(board, WR);
+
+    bool validMoves[8][8] = {
+        {0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0},
+        {1, 1, 1, 0, 1, 1, 1, 1},
+        {0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0},
+    };
+
+    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+}
+
+TEST(rock, rock_cannot_go_over_pieces) {
+    Piece board[8][8] = {
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, BP, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, BP, __, WR, __, BP, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, BP, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+    const Position pieceToMove = positionOfPiece(board, WR);
+
+    bool validMoves[8][8] = {
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 1, 1, 0, 1, 1, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
     };

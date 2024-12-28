@@ -88,7 +88,9 @@ bool emptyAtColRow(Piece board[COLS][ROWS], const int col, const int row);
 
 bool emptyAt(Piece board[COLS][ROWS], const Position position);
 
-bool isColumnEmptyOnRange(Piece board[COLS][ROWS], const Position start, const Position end);
+bool isColumnEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end);
+
+bool isRowEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end);
 
 bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Position origin, const Position destination);
 

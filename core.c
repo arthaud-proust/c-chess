@@ -1,4 +1,6 @@
 #include "core.h"
+
+#include <iso646.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -118,20 +120,42 @@ bool emptyAt(Piece board[COLS][ROWS], const Position position) {
     return pieceAt(board, position) == __;
 }
 
-bool isColumnEmptyOnRange(Piece board[COLS][ROWS], const Position start, const Position end) {
+bool isColumnEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end) {
     if (start.col != end.col) {
         return false;
     }
 
     if (start.row <= end.row) {
-        for (int row = start.row; row <= end.row; row++) {
+        for (int row = start.row + 1; row < end.row; row++) {
             if (pieceAtColRow(board, start.col, row)) {
                 return false;
             }
         }
     } else {
-        for (int row = end.row; row <= start.row; row++) {
+        for (int row = end.row + 1; row < start.row; row++) {
             if (pieceAtColRow(board, start.col, row)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool isRowEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end) {
+    if (start.row != end.row) {
+        return false;
+    }
+
+    if (start.col <= end.col) {
+        for (int col = start.col + 1; col < end.col; col++) {
+            if (pieceAtColRow(board, col, start.row)) {
+                return false;
+            }
+        }
+    } else {
+        for (int col = end.col + 1; col < start.col; col++) {
+            if (pieceAtColRow(board, col, start.row)) {
                 return false;
             }
         }
@@ -171,7 +195,7 @@ bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Po
         if (
             origin.row == 1
             && areSamePositions(destination, atTopOf(origin, 2))
-            && isColumnEmptyOnRange(board, atTopOf(origin, 1), destination)
+            && isColumnEmptyBetween(board, origin, destination)
         ) {
             return true;
         }
@@ -187,20 +211,24 @@ bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Po
         if (
             origin.row == 6
             && areSamePositions(destination, atBottomOf(origin, 2))
-            && isColumnEmptyOnRange(board, atBottomOf(origin, 1), destination)
+            && isColumnEmptyBetween(board, origin, destination)
         ) {
             return true;
         }
         return areSamePositions(destination, atBottomOf(origin, 1));
     }
 
-    if (pieceAtOrigin == BN || pieceAtOrigin == WN) {
+    if (pieceAtOrigin == WN || pieceAtOrigin == BN) {
         return (rowsBetween(origin, destination) == 2 && colsBetween(origin, destination) == 1)
                || (rowsBetween(origin, destination) == 1 && colsBetween(origin, destination) == 2);
     }
 
-    if (pieceAtOrigin == BK || pieceAtOrigin == WK) {
+    if (pieceAtOrigin == WK || pieceAtOrigin == BK) {
         return rowsBetween(origin, destination) <= 1 && colsBetween(origin, destination) <= 1;
+    }
+
+    if (pieceAtOrigin == WR || pieceAtOrigin == BR) {
+        return isRowEmptyBetween(board, origin, destination) || isColumnEmptyBetween(board, origin, destination);
     }
 
     return false;
