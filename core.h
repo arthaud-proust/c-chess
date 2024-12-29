@@ -58,49 +58,49 @@ typedef struct {
     int row;
 } Position;
 
-bool areSamePositions(const Position a, const Position b);
+bool areSamePositions(Position a, Position b);
 
-Position withSameRow(const Position position, const int col);
+Position withSameRow(Position position, int col);
 
-Position withSameCol(const Position position, const int row);
+Position withSameCol(Position position, int row);
 
-Position atTopOf(const Position position, const int distance);
+Position atTopOf(Position position, int distance);
 
-Position atBottomOf(const Position position, const int distance);
+Position atBottomOf(Position position, int distance);
 
-Position atLeftOf(const Position position, const int distance);
+Position atLeftOf(Position position, int distance);
 
-Position atRightOf(const Position position, const int distance);
+Position atRightOf(Position position, int distance);
 
-int rowsBetween(const Position a, const Position b);
+int rowsBetween(Position a, Position b);
 
-int colsBetween(const Position a, const Position b);
+int colsBetween(Position a, Position b);
 
-Color pieceColor(const Piece piece);
+Color pieceColor(Piece piece);
 
-void moveTo(Piece board[COLS][ROWS], const Position origin, const Position destination);
+void moveTo(Piece board[COLS][ROWS], Position origin, Position destination);
 
-Piece pieceAtColRow(Piece board[COLS][ROWS], const int col, const int row);
+Piece pieceAtColRow(Piece board[COLS][ROWS], int col, int row);
 
-Piece pieceAt(Piece board[COLS][ROWS], const Position position);
+Piece pieceAt(Piece board[COLS][ROWS], Position position);
 
-Position positionOfPiece(Piece board[COLS][ROWS], const Piece piece);
+Position positionOfPiece(Piece board[COLS][ROWS], Piece piece);
 
-bool isEmptyAtColRow(Piece board[COLS][ROWS], const int col, const int row);
+bool isEmptyAtColRow(Piece board[COLS][ROWS], int col, int row);
 
-bool isEmptyAt(Piece board[COLS][ROWS], const Position position);
+bool isEmptyAt(Piece board[COLS][ROWS], Position position);
 
-bool isColumnEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end);
+bool isColumnEmptyBetween(Piece board[COLS][ROWS], Position start, Position end);
 
-bool isRowEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end);
+bool isRowEmptyBetween(Piece board[COLS][ROWS], Position start, Position end);
 
-bool isDiagonalEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end);
+bool isDiagonalEmptyBetween(Piece board[COLS][ROWS], Position start, Position end);
 
-bool isPositionOnBoard(const Position position);
+bool isPositionOnBoard(Position position);
 
-bool isMoveValid(Piece board[COLS][ROWS], const Position origin, const Position destination);
+bool isMoveValid(Piece board[COLS][ROWS], Position origin, Position destination);
 
-bool isKingInCheck(Piece board[COLS][ROWS], const Color currentPlayer);
+bool isKingInCheck(Piece board[COLS][ROWS], Color currentPlayer);
 
 void constructBoard(Piece board[COLS][ROWS]);
 
