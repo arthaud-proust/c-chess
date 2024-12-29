@@ -112,11 +112,26 @@ Piece pieceAt(Piece board[COLS][ROWS], const Position position) {
     return pieceAtColRow(board, position.col, position.row);
 }
 
-bool emptyAtColRow(Piece board[COLS][ROWS], const int col, const int row) {
+Position positionOfPiece(Piece board[COLS][ROWS], const Piece piece) {
+    Position position = {-1, -1};
+
+    for (int col = 0; col < COLS; col++) {
+        for (int row = 0; row < ROWS; row++) {
+            if (board[col][row] == piece) {
+                position.col = col;
+                position.row = row;
+            }
+        }
+    }
+
+    return position;
+}
+
+bool isEmptyAtColRow(Piece board[COLS][ROWS], const int col, const int row) {
     return pieceAtColRow(board, col, row) == __;
 }
 
-bool emptyAt(Piece board[COLS][ROWS], const Position position) {
+bool isEmptyAt(Piece board[COLS][ROWS], const Position position) {
     return pieceAt(board, position) == __;
 }
 
@@ -176,13 +191,17 @@ bool isDiagonalEmptyBetween(Piece board[COLS][ROWS], const Position start, const
     return true;
 }
 
-bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Position origin, const Position destination) {
+bool isPositionOnBoard(const Position position) {
+    return 0 <= position.col && position.col < COLS && 0 <= position.row && position.row < ROWS;
+}
+
+bool isMoveValid(Piece board[COLS][ROWS], const Position origin, const Position destination) {
     const Piece pieceAtOrigin = pieceAt(board, origin);
     const Color pieceColorAtOrigin = pieceColor(pieceAtOrigin);
     const Piece pieceAtDestination = pieceAt(board, destination);
     const Color pieceColorAtDestination = pieceColor(pieceAtDestination);
 
-    if (destination.col < 0 || COLS <= destination.col || destination.row < 0 || ROWS <= destination.row) {
+    if (!isPositionOnBoard(destination)) {
         return false;
     }
 
@@ -190,11 +209,7 @@ bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Po
         return false;
     }
 
-    if (pieceColorAtOrigin != currentPlayer) {
-        return false;
-    }
-
-    if (pieceAtDestination && pieceColorAtDestination == currentPlayer) {
+    if (pieceAtDestination && pieceColorAtDestination == pieceColorAtOrigin) {
         return false;
     }
 
@@ -252,6 +267,32 @@ bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Po
         return isRowEmptyBetween(board, origin, destination)
                || isColumnEmptyBetween(board, origin, destination)
                || isDiagonalEmptyBetween(board, origin, destination);
+    }
+
+    return false;
+}
+
+bool isKingInCheck(Piece board[COLS][ROWS], const Color currentPlayer) {
+    const Position kingPosition = positionOfPiece(board, currentPlayer == WHITE ? BK : WK);
+
+    if (!isPositionOnBoard(kingPosition)) {
+        return false;
+    }
+
+    Position piecePosition = {-1, -1};
+    for (int col = 0; col < COLS; col++) {
+        for (int row = 0; row < ROWS; row++) {
+            piecePosition.col = col;
+            piecePosition.row = row;
+
+            if (areSamePositions(kingPosition, piecePosition)) {
+                continue;
+            }
+
+            if (isMoveValid(board, piecePosition, kingPosition)) {
+                return true;
+            }
+        }
     }
 
     return false;

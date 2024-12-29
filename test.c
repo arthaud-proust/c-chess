@@ -3,22 +3,7 @@
 
 TAU_MAIN()
 
-Position positionOfPiece(Piece movesBoard[COLS][ROWS], const Piece piece) {
-    Position position = {-1, -1};
-
-    for (int col = 0; col < COLS; col++) {
-        for (int row = 0; row < ROWS; row++) {
-            if (movesBoard[col][row] == piece) {
-                position.col = col;
-                position.row = row;
-            }
-        }
-    }
-
-    return position;
-}
-
-void ASSERT_VALID_MOVES_MATCH(Piece board[COLS][ROWS], const Color player, const Position pieceToMove, bool validMoves[COLS][ROWS]) {
+void ASSERT_VALID_MOVES_MATCH(Piece board[COLS][ROWS], const Position pieceToMove, bool validMoves[COLS][ROWS]) {
     REQUIRE_TRUE(pieceToMove.col > -1 && pieceToMove.row > -1, "Piece not found");
 
     for (int col = 0; col < COLS; col++) {
@@ -26,7 +11,7 @@ void ASSERT_VALID_MOVES_MATCH(Piece board[COLS][ROWS], const Color player, const
             const bool expectedCanMove = validMoves[col][row];
             const Position destination = {col, row};
             CHECK_EQ(
-                canMovePieceTo(board, player, pieceToMove, destination),
+                isMoveValid(board, pieceToMove, destination),
                 expectedCanMove,
                 "Expected %d:%d->%d:%d to be %s",
                 pieceToMove.col,
@@ -210,33 +195,6 @@ TEST(isDiagonalEmptyBetween, return_false_if_piece_between_start_and_end) {
     CHECK_FALSE(isDiagonalEmptyBetween(board, end, start));
 }
 
-TEST(all, cannot_move_other_player_piece) {
-    Piece board[8][8] = {
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, WP, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-    const Position pieceToMove = positionOfPiece(board, WP);
-
-    bool validMoves[8][8] = {
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-    };
-
-    ASSERT_VALID_MOVES_MATCH(board, BLACK, pieceToMove, validMoves);
-}
-
 TEST(all, cannot_move_piece_on_another_if_same_colour) {
     Piece board[8][8] = {
         {__, __, __, __, __, __, __, __},
@@ -261,7 +219,7 @@ TEST(all, cannot_move_piece_on_another_if_same_colour) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(all, cannot_move_piece_out_of_board) {
@@ -287,11 +245,11 @@ TEST(all, cannot_move_piece_out_of_board) {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 
     const Position outOfBoard = {3, 8};
     REQUIRE_EQ(
-        canMovePieceTo(board, WHITE, pieceToMove, outOfBoard),
+        isMoveValid(board, pieceToMove, outOfBoard),
         false
     );
 }
@@ -320,7 +278,7 @@ TEST(pawn, white_can_move_1_cell_front_when_not_at_start_row) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(pawn, white_can_move_1_or_2_cells_front_when_at_start_row) {
@@ -347,7 +305,7 @@ TEST(pawn, white_can_move_1_or_2_cells_front_when_at_start_row) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(pawn, white_cannot_move_2_cells_front_when_piece_in_front_of_it) {
@@ -374,7 +332,7 @@ TEST(pawn, white_cannot_move_2_cells_front_when_piece_in_front_of_it) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(pawn, white_can_eat_at_front_left_or_front_right) {
@@ -401,7 +359,7 @@ TEST(pawn, white_can_eat_at_front_left_or_front_right) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(pawn, black_can_move_1_cell_front_when_not_at_start_row) {
@@ -428,7 +386,7 @@ TEST(pawn, black_can_move_1_cell_front_when_not_at_start_row) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, BLACK, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(pawn, black_can_move_1_or_2_cells_front_when_at_start_row) {
@@ -455,7 +413,7 @@ TEST(pawn, black_can_move_1_or_2_cells_front_when_at_start_row) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, BLACK, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(pawn, black_cannot_move_2_cells_front_when_piece_in_front_of_it) {
@@ -482,7 +440,7 @@ TEST(pawn, black_cannot_move_2_cells_front_when_piece_in_front_of_it) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, BLACK, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(pawn, black_can_eat_at_front_left_or_front_right) {
@@ -509,7 +467,7 @@ TEST(pawn, black_can_eat_at_front_left_or_front_right) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, BLACK, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(knight, can_move_in_l_shape) {
@@ -536,7 +494,7 @@ TEST(knight, can_move_in_l_shape) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(king, can_move_in_any_direction_at_distance_of_1) {
@@ -563,7 +521,7 @@ TEST(king, can_move_in_any_direction_at_distance_of_1) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(rock, can_move_in_column_or_row_at_any_distance) {
@@ -590,7 +548,7 @@ TEST(rock, can_move_in_column_or_row_at_any_distance) {
         {0, 0, 0, 1, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(rock, cannot_go_over_pieces) {
@@ -617,7 +575,7 @@ TEST(rock, cannot_go_over_pieces) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(bishop, can_move_in_diagonal_at_any_distance) {
@@ -644,7 +602,7 @@ TEST(bishop, can_move_in_diagonal_at_any_distance) {
         {0, 0, 0, 0, 0, 0, 0, 1},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(bishop, cannot_go_over_pieces) {
@@ -671,7 +629,7 @@ TEST(bishop, cannot_go_over_pieces) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(queen, can_move_in_column_or_row_or_diagonal_at_any_distance) {
@@ -698,7 +656,7 @@ TEST(queen, can_move_in_column_or_row_or_diagonal_at_any_distance) {
         {0, 0, 0, 1, 0, 0, 0, 1},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
 }
 
 TEST(queen, cannot_go_over_pieces) {
@@ -725,5 +683,35 @@ TEST(queen, cannot_go_over_pieces) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(board, WHITE, pieceToMove, validMoves);
+    ASSERT_VALID_MOVES_MATCH(board, pieceToMove, validMoves);
+}
+
+TEST(isKingInCheck, should_return_true_when_piece_can_eat_king) {
+    Piece board[8][8] = {
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, WK, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, BQ, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+
+    REQUIRE_TRUE(isKingInCheck(board, BLACK));
+}
+
+TEST(isKingInCheck, should_return_false_when_none_piece_can_eat_king) {
+    Piece board[8][8] = {
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, WK, __, __, __, __},
+        {__, __, __, __, WP, __, __, __},
+        {__, __, __, __, __, BQ, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+
+    REQUIRE_FALSE(isKingInCheck(board, BLACK));
 }

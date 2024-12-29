@@ -79,7 +79,7 @@ int main(void) {
             origin = positionFromStr(originStr);
             destination = positionFromStr(destinationStr);
 
-            if (canMovePieceTo(board, currentPlayer, origin, destination)) {
+            if (isMoveValid(board, currentPlayer, origin, destination)) {
                 isInvalid = false;
             } else {
                 printf("\n%s -> %s is invalid! Please try again.", originStr, destinationStr);

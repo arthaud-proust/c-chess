@@ -84,9 +84,11 @@ Piece pieceAtColRow(Piece board[COLS][ROWS], const int col, const int row);
 
 Piece pieceAt(Piece board[COLS][ROWS], const Position position);
 
-bool emptyAtColRow(Piece board[COLS][ROWS], const int col, const int row);
+Position positionOfPiece(Piece board[COLS][ROWS], const Piece piece);
 
-bool emptyAt(Piece board[COLS][ROWS], const Position position);
+bool isEmptyAtColRow(Piece board[COLS][ROWS], const int col, const int row);
+
+bool isEmptyAt(Piece board[COLS][ROWS], const Position position);
 
 bool isColumnEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end);
 
@@ -94,7 +96,11 @@ bool isRowEmptyBetween(Piece board[COLS][ROWS], const Position start, const Posi
 
 bool isDiagonalEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end);
 
-bool canMovePieceTo(Piece board[COLS][ROWS], const Color currentPlayer, const Position origin, const Position destination);
+bool isPositionOnBoard(const Position position);
+
+bool isMoveValid(Piece board[COLS][ROWS], const Position origin, const Position destination);
+
+bool isKingInCheck(Piece board[COLS][ROWS], const Color currentPlayer);
 
 void constructBoard(Piece board[COLS][ROWS]);
 
