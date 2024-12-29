@@ -42,7 +42,7 @@ typedef enum {
     BK, // Black King
     BQ, // Black Queen
     BB, // Black Bishop
-    BR, // Black Rock
+    BR, // Black Rook
     BN, // Black Knight
     BP, // Black Pawn
 } Piece;
@@ -57,6 +57,28 @@ typedef struct {
     int col;
     int row;
 } Position;
+
+typedef struct {
+    Piece board[8][8];
+    Color currentPlayer;
+    bool hasWhiteLostCastling;
+    bool hasBlackLostCastling;
+} GameSnapshot;
+
+typedef struct {
+    Position kingOrigin;
+    Position kingDestination;
+    Position rookOrigin;
+    Position rookDestination;
+} CastlingPositions;
+
+const CastlingPositions WHITE_CASTLING_KING_SIDE;
+
+const CastlingPositions WHITE_CASTLING_QUEEN_SIDE;
+
+const CastlingPositions BLACK_CASTLING_KING_SIDE;
+
+const CastlingPositions BLACK_CASTLING_QUEEN_SIDE;
 
 bool areSamePositions(Position a, Position b);
 
@@ -98,9 +120,9 @@ bool isDiagonalEmptyBetween(Piece board[COLS][ROWS], Position start, Position en
 
 bool isPositionOnBoard(Position position);
 
-bool isMoveValid(Piece board[COLS][ROWS], Position origin, Position destination);
+bool isMoveValid(GameSnapshot *gameSnapshot, Position origin, Position destination);
 
-bool isKingInCheck(Piece board[COLS][ROWS], Color currentPlayer);
+bool isKingInCheck(GameSnapshot *gameSnapshot);
 
 void constructBoard(Piece board[COLS][ROWS]);
 

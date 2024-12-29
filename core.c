@@ -10,6 +10,35 @@ const int COLS = 8;
 const int ASCII_LOWER_A = 97;
 const int ASCII_ONE = 49;
 
+const CastlingPositions WHITE_CASTLING_KING_SIDE = {
+    {4, 0},
+    {6, 0},
+    {7, 0},
+    {5, 0}
+};
+
+const CastlingPositions WHITE_CASTLING_QUEEN_SIDE = {
+    {4, 0},
+    {2, 0},
+    {0, 0},
+    {3, 0}
+};
+
+const CastlingPositions BLACK_CASTLING_KING_SIDE = {
+    {4, 7},
+    {6, 7},
+    {7, 7},
+    {5, 7}
+};
+
+const CastlingPositions BLACK_CASTLING_QUEEN_SIDE = {
+    {4, 7},
+    {2, 7},
+    {0, 7},
+    {3, 7}
+};
+
+
 bool areSamePositions(const Position a, const Position b) {
     return a.col == b.col && a.row == b.row;
 }
@@ -195,10 +224,10 @@ bool isPositionOnBoard(const Position position) {
     return 0 <= position.col && position.col < COLS && 0 <= position.row && position.row < ROWS;
 }
 
-bool isMoveValid(Piece board[COLS][ROWS], const Position origin, const Position destination) {
-    const Piece pieceAtOrigin = pieceAt(board, origin);
+bool isMoveValid(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
+    const Piece pieceAtOrigin = pieceAt(gameSnapshot->board, origin);
     const Color pieceColorAtOrigin = pieceColor(pieceAtOrigin);
-    const Piece pieceAtDestination = pieceAt(board, destination);
+    const Piece pieceAtDestination = pieceAt(gameSnapshot->board, destination);
     const Color pieceColorAtDestination = pieceColor(pieceAtDestination);
 
     if (!isPositionOnBoard(destination)) {
@@ -222,7 +251,7 @@ bool isMoveValid(Piece board[COLS][ROWS], const Position origin, const Position 
         if (
             origin.row == 1
             && areSamePositions(destination, atTopOf(origin, 2))
-            && isColumnEmptyBetween(board, origin, destination)
+            && isColumnEmptyBetween(gameSnapshot->board, origin, destination)
         ) {
             return true;
         }
@@ -238,7 +267,7 @@ bool isMoveValid(Piece board[COLS][ROWS], const Position origin, const Position 
         if (
             origin.row == 6
             && areSamePositions(destination, atBottomOf(origin, 2))
-            && isColumnEmptyBetween(board, origin, destination)
+            && isColumnEmptyBetween(gameSnapshot->board, origin, destination)
         ) {
             return true;
         }
@@ -251,29 +280,41 @@ bool isMoveValid(Piece board[COLS][ROWS], const Position origin, const Position 
     }
 
     if (pieceAtOrigin == WK || pieceAtOrigin == BK) {
+        const CastlingPositions *kingSide = gameSnapshot->currentPlayer == WHITE ? &WHITE_CASTLING_KING_SIDE : &BLACK_CASTLING_KING_SIDE;
+        const CastlingPositions *queenSide = gameSnapshot->currentPlayer == WHITE ? &WHITE_CASTLING_QUEEN_SIDE : &BLACK_CASTLING_QUEEN_SIDE;
+        const bool hasLostCastling = gameSnapshot->currentPlayer == WHITE ? gameSnapshot->hasWhiteLostCastling : gameSnapshot->hasBlackLostCastling;
+
+        if (areSamePositions(origin, kingSide->kingOrigin) && areSamePositions(destination, kingSide->kingDestination)) {
+            return !hasLostCastling && isRowEmptyBetween(gameSnapshot->board, kingSide->kingOrigin, kingSide->rookOrigin);
+        }
+
+        if (areSamePositions(origin, queenSide->kingOrigin) && areSamePositions(destination, queenSide->kingDestination)) {
+            return !hasLostCastling && isRowEmptyBetween(gameSnapshot->board, queenSide->kingOrigin, queenSide->rookOrigin);
+        }
+
         return rowsBetween(origin, destination) <= 1 && colsBetween(origin, destination) <= 1;
     }
 
     if (pieceAtOrigin == WR || pieceAtOrigin == BR) {
-        return isRowEmptyBetween(board, origin, destination)
-               || isColumnEmptyBetween(board, origin, destination);
+        return isRowEmptyBetween(gameSnapshot->board, origin, destination)
+               || isColumnEmptyBetween(gameSnapshot->board, origin, destination);
     }
 
     if (pieceAtOrigin == WB || pieceAtOrigin == BB) {
-        return isDiagonalEmptyBetween(board, origin, destination);
+        return isDiagonalEmptyBetween(gameSnapshot->board, origin, destination);
     }
 
     if (pieceAtOrigin == WQ || pieceAtOrigin == BQ) {
-        return isRowEmptyBetween(board, origin, destination)
-               || isColumnEmptyBetween(board, origin, destination)
-               || isDiagonalEmptyBetween(board, origin, destination);
+        return isRowEmptyBetween(gameSnapshot->board, origin, destination)
+               || isColumnEmptyBetween(gameSnapshot->board, origin, destination)
+               || isDiagonalEmptyBetween(gameSnapshot->board, origin, destination);
     }
 
     return false;
 }
 
-bool isKingInCheck(Piece board[COLS][ROWS], const Color currentPlayer) {
-    const Position kingPosition = positionOfPiece(board, currentPlayer == WHITE ? BK : WK);
+bool isKingInCheck(GameSnapshot *gameSnapshot) {
+    const Position kingPosition = positionOfPiece(gameSnapshot->board, gameSnapshot->currentPlayer == WHITE ? BK : WK);
 
     if (!isPositionOnBoard(kingPosition)) {
         return false;
@@ -289,7 +330,7 @@ bool isKingInCheck(Piece board[COLS][ROWS], const Color currentPlayer) {
                 continue;
             }
 
-            if (isMoveValid(board, piecePosition, kingPosition)) {
+            if (isMoveValid(gameSnapshot, piecePosition, kingPosition)) {
                 return true;
             }
         }
