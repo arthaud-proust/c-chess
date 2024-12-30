@@ -2,6 +2,7 @@
 
 #include <iso646.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 const int ROWS = 8;
@@ -127,10 +128,28 @@ Color pieceColor(const Piece piece) {
     return NONE;
 }
 
-
 void moveTo(Piece board[COLS][ROWS], const Position origin, const Position destination) {
     board[destination.col][destination.row] = board[origin.col][origin.row];
     board[origin.col][origin.row] = __;
+}
+
+GameSnapshot appliedMove(const GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
+    GameSnapshot nextGameSnapshot = {};
+
+    for (int col = 0; col < COLS; col++) {
+        for (int row = 0; row < ROWS; row++) {
+            nextGameSnapshot.board[col][row] = gameSnapshot->board[col][row];
+        }
+    }
+
+    nextGameSnapshot.board[destination.col][destination.row] = nextGameSnapshot.board[origin.col][origin.row];
+    nextGameSnapshot.board[origin.col][origin.row] = __;
+
+    nextGameSnapshot.currentPlayer = gameSnapshot->currentPlayer == WHITE ? BLACK : WHITE;
+    nextGameSnapshot.hasWhiteLostCastling = gameSnapshot->hasWhiteLostCastling;
+    nextGameSnapshot.hasBlackLostCastling = gameSnapshot->hasBlackLostCastling;
+
+    return nextGameSnapshot;
 }
 
 Piece pieceAtColRow(Piece board[COLS][ROWS], const int col, const int row) {
@@ -199,21 +218,22 @@ bool isRowEmptyBetween(Piece board[COLS][ROWS], const Position start, const Posi
 }
 
 bool isDiagonalEmptyBetween(Piece board[COLS][ROWS], const Position start, const Position end) {
-    if (rowsBetween(start, end) != colsBetween(start, end)) {
+    const int dx = end.col - start.col;
+    const int dy = end.row - start.row;
+
+    if (abs(dx) != abs(dy)) {
         return false;
     }
 
-    const int colStart = start.col <= end.col ? start.col : end.col;
-    const int colEnd = start.col <= end.col ? end.col : start.col;
+    const int steps = abs(dx); // Nombre de cases à parcourir
+    const int xStep = dx / steps; // Direction en x (+1 ou -1)
+    const int yStep = dy / steps; // Direction en y (+1 ou -1)
 
-    const int rowStart = start.row <= end.row ? start.row : end.row;
-    const int rowEnd = start.row <= end.row ? end.row : start.row;
-
-    for (int col = colStart + 1; col < colEnd; col++) {
-        for (int row = rowStart + 1; row < rowEnd; row++) {
-            if (pieceAtColRow(board, col, row)) {
-                return false;
-            }
+    for (int i = 1; i < steps; i++) {
+        const int col = start.col + i * xStep;
+        const int row = start.row + i * yStep;
+        if (pieceAtColRow(board, col, row)) {
+            return false;
         }
     }
 
@@ -224,7 +244,7 @@ bool isPositionOnBoard(const Position position) {
     return 0 <= position.col && position.col < COLS && 0 <= position.row && position.row < ROWS;
 }
 
-bool isMoveValid(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
+bool isMoveValid(const GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
     const Piece pieceAtOrigin = pieceAt(gameSnapshot->board, origin);
     const Color pieceColorAtOrigin = pieceColor(pieceAtOrigin);
     const Piece pieceAtDestination = pieceAt(gameSnapshot->board, destination);
@@ -313,10 +333,8 @@ bool isMoveValid(GameSnapshot *gameSnapshot, const Position origin, const Positi
     return false;
 }
 
-bool isKingInCheck(GameSnapshot *gameSnapshot) {
-    const Position kingPosition = positionOfPiece(gameSnapshot->board, gameSnapshot->currentPlayer == WHITE ? BK : WK);
-
-    if (!isPositionOnBoard(kingPosition)) {
+bool isPieceThreatened(const GameSnapshot *gameSnapshot, const Position piece) {
+    if (!isPositionOnBoard(piece)) {
         return false;
     }
 
@@ -326,17 +344,33 @@ bool isKingInCheck(GameSnapshot *gameSnapshot) {
             piecePosition.col = col;
             piecePosition.row = row;
 
-            if (areSamePositions(kingPosition, piecePosition)) {
+            if (areSamePositions(piece, piecePosition)) {
                 continue;
             }
 
-            if (isMoveValid(gameSnapshot, piecePosition, kingPosition)) {
+            if (isMoveValid(gameSnapshot, piecePosition, piece)) {
                 return true;
             }
         }
     }
 
     return false;
+}
+
+bool isPlayerInCheck(GameSnapshot *gameSnapshot, const Color player) {
+    const Position kingPosition = positionOfPiece(gameSnapshot->board, player == WHITE ? WK : BK);
+
+    return isPieceThreatened(gameSnapshot, kingPosition);
+}
+
+bool canPlay(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
+    if (!isMoveValid(gameSnapshot, origin, destination)) {
+        return false;
+    }
+
+    GameSnapshot nextSnapshot = appliedMove(gameSnapshot, origin, destination);
+
+    return !isPlayerInCheck(&nextSnapshot, gameSnapshot->currentPlayer);
 }
 
 void constructBoard(Piece board[COLS][ROWS]) {

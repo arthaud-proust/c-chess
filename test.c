@@ -3,15 +3,15 @@
 
 TAU_MAIN()
 
-void ASSERT_VALID_MOVES_MATCH(GameSnapshot *gameSnapshot, const Position pieceToMove, bool validMoves[COLS][ROWS]) {
+void ASSERT_PLAYABLE_MOVES_MATCH(GameSnapshot *gameSnapshot, const Position pieceToMove, bool playableMoves[COLS][ROWS]) {
     REQUIRE_TRUE(pieceToMove.col > -1 && pieceToMove.row > -1, "Piece not found");
 
     for (int col = 0; col < COLS; col++) {
         for (int row = 0; row < ROWS; row++) {
-            const bool expectedCanMove = validMoves[col][row];
+            const bool expectedCanMove = playableMoves[col][row];
             const Position destination = {col, row};
             CHECK_EQ(
-                isMoveValid(gameSnapshot, pieceToMove, destination),
+                canPlay(gameSnapshot, pieceToMove, destination),
                 expectedCanMove,
                 "Expected %d:%d->%d:%d to be %s",
                 pieceToMove.col,
@@ -140,59 +140,79 @@ TEST(isRowEmptyBetween, return_false_if_piece_between_start_and_end) {
 
 TEST(isDiagonalEmptyBetween, return_false_if_not_same_diagonal) {
     Piece board[8][8] = {
+        {WK, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
+        {__, __, BK, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
     };
 
-    const Position start = {0, 0};
-    const Position end = {1, 0};
+    const Position start = positionOfPiece(board, WK);
+    const Position end = positionOfPiece(board, BK);
 
     CHECK_FALSE(isDiagonalEmptyBetween(board, start, end));
     CHECK_FALSE(isDiagonalEmptyBetween(board, end, start));
 }
 
 TEST(isDiagonalEmptyBetween, return_true_if_no_piece_between_start_and_end) {
-    Piece board[8][8] = {
-        {WP, __, __, __, __, __, __, __},
+    Piece board1[8][8] = {
+        {WK, WP, WP, WP, __, __, __, __},
+        {WP, __, WP, WP, __, __, __, __},
+        {WP, WP, __, WP, __, __, __, __},
+        {WP, WP, WP, BQ, __, __, __, __},
         {__, __, __, __, __, __, __, __},
-        {__, __, WP, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+    Piece board2[8][8] = {
+        {WP, WP, WP, BQ, __, __, __, __},
+        {WP, WP, __, WP, __, __, __, __},
+        {WP, __, WP, WP, __, __, __, __},
+        {WK, WP, WP, WP, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
     };
 
-    const Position start = {0, 0};
-    const Position end = {2, 2};
+    CHECK_TRUE(isDiagonalEmptyBetween(board1, positionOfPiece(board1, WK), positionOfPiece(board1, BQ)));
+    CHECK_TRUE(isDiagonalEmptyBetween(board1, positionOfPiece(board1, BQ), positionOfPiece(board1, WK)));
 
-    CHECK_TRUE(isDiagonalEmptyBetween(board, start, end));
-    CHECK_TRUE(isDiagonalEmptyBetween(board, end, start));
+    CHECK_TRUE(isDiagonalEmptyBetween(board2, positionOfPiece(board2, WK), positionOfPiece(board2, BQ)));
+    CHECK_TRUE(isDiagonalEmptyBetween(board2, positionOfPiece(board2, BQ), positionOfPiece(board2, WK)));
 }
 
 TEST(isDiagonalEmptyBetween, return_false_if_piece_between_start_and_end) {
-    Piece board[8][8] = {
-        {WP, __, __, __, __, __, __, __},
-        {__, WP, __, __, __, __, __, __},
-        {__, __, WP, __, __, __, __, __},
+    Piece board1[8][8] = {
+        {WK, WP, WP, WP, __, __, __, __},
+        {WP, WP, WP, WP, __, __, __, __},
+        {WP, WP, WP, WP, __, __, __, __},
+        {WP, WP, WP, BQ, __, __, __, __},
         {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+        {__, __, __, __, __, __, __, __},
+    };
+    Piece board2[8][8] = {
+        {WP, WP, WP, BQ, __, __, __, __},
+        {WP, WP, WP, WP, __, __, __, __},
+        {WP, WP, WP, WP, __, __, __, __},
+        {WK, WP, WP, WP, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
         {__, __, __, __, __, __, __, __},
     };
 
-    const Position start = {0, 0};
-    const Position end = {2, 2};
+    CHECK_FALSE(isDiagonalEmptyBetween(board1, positionOfPiece(board1, WK), positionOfPiece(board1, BQ)));
+    CHECK_FALSE(isDiagonalEmptyBetween(board1, positionOfPiece(board1, BQ), positionOfPiece(board1, WK)));
 
-    CHECK_FALSE(isDiagonalEmptyBetween(board, start, end));
-    CHECK_FALSE(isDiagonalEmptyBetween(board, end, start));
+    CHECK_FALSE(isDiagonalEmptyBetween(board2, positionOfPiece(board2, WK), positionOfPiece(board2, BQ)));
+    CHECK_FALSE(isDiagonalEmptyBetween(board2, positionOfPiece(board2, BQ), positionOfPiece(board2, WK)));
 }
 
 TEST(all, cannot_move_piece_on_another_if_same_colour) {
@@ -213,7 +233,7 @@ TEST(all, cannot_move_piece_on_another_if_same_colour) {
     };
     const Position pieceToMove = {3, 2};
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -224,7 +244,7 @@ TEST(all, cannot_move_piece_on_another_if_same_colour) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(all, cannot_move_piece_out_of_board) {
@@ -245,7 +265,7 @@ TEST(all, cannot_move_piece_out_of_board) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -255,13 +275,44 @@ TEST(all, cannot_move_piece_out_of_board) {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 
     const Position outOfBoard = {3, 8};
     REQUIRE_EQ(
         isMoveValid(&gameSnapshot, pieceToMove, outOfBoard),
         false
     );
+}
+
+TEST(all, cannot_move_if_it_put_king_in_check) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, BQ, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, WP, __, __, __, __, __},
+            {__, WK, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
+
+    bool playableMoves[8][8] = {
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+    };
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(pawn, white_can_move_1_cell_front_when_not_at_start_row) {
@@ -282,7 +333,7 @@ TEST(pawn, white_can_move_1_cell_front_when_not_at_start_row) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -293,7 +344,7 @@ TEST(pawn, white_can_move_1_cell_front_when_not_at_start_row) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(pawn, white_can_move_1_or_2_cells_front_when_at_start_row) {
@@ -314,7 +365,7 @@ TEST(pawn, white_can_move_1_or_2_cells_front_when_at_start_row) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 1, 1, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -325,7 +376,7 @@ TEST(pawn, white_can_move_1_or_2_cells_front_when_at_start_row) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(pawn, white_cannot_move_2_cells_front_when_piece_in_front_of_it) {
@@ -346,7 +397,7 @@ TEST(pawn, white_cannot_move_2_cells_front_when_piece_in_front_of_it) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -357,7 +408,7 @@ TEST(pawn, white_cannot_move_2_cells_front_when_piece_in_front_of_it) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(pawn, white_can_eat_at_front_left_or_front_right) {
@@ -378,7 +429,7 @@ TEST(pawn, white_can_eat_at_front_left_or_front_right) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 0},
@@ -389,7 +440,7 @@ TEST(pawn, white_can_eat_at_front_left_or_front_right) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(pawn, black_can_move_1_cell_front_when_not_at_start_row) {
@@ -410,7 +461,7 @@ TEST(pawn, black_can_move_1_cell_front_when_not_at_start_row) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, BP);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 1, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -421,7 +472,7 @@ TEST(pawn, black_can_move_1_cell_front_when_not_at_start_row) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(pawn, black_can_move_1_or_2_cells_front_when_at_start_row) {
@@ -442,7 +493,7 @@ TEST(pawn, black_can_move_1_or_2_cells_front_when_at_start_row) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, BP);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 1, 1, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -453,7 +504,7 @@ TEST(pawn, black_can_move_1_or_2_cells_front_when_at_start_row) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(pawn, black_cannot_move_2_cells_front_when_piece_in_front_of_it) {
@@ -474,7 +525,7 @@ TEST(pawn, black_cannot_move_2_cells_front_when_piece_in_front_of_it) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, BP);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -485,7 +536,7 @@ TEST(pawn, black_cannot_move_2_cells_front_when_piece_in_front_of_it) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(pawn, black_can_eat_at_front_left_or_front_right) {
@@ -506,7 +557,7 @@ TEST(pawn, black_can_eat_at_front_left_or_front_right) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, BP);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 1, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 1, 0, 0, 0},
@@ -517,7 +568,7 @@ TEST(pawn, black_can_eat_at_front_left_or_front_right) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(knight, can_move_in_l_shape) {
@@ -538,7 +589,7 @@ TEST(knight, can_move_in_l_shape) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WN);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 1, 0, 1, 0, 0, 0},
         {0, 1, 0, 0, 0, 1, 0, 0},
@@ -549,7 +600,7 @@ TEST(knight, can_move_in_l_shape) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(king, can_move_in_any_direction_at_distance_of_1) {
@@ -570,7 +621,7 @@ TEST(king, can_move_in_any_direction_at_distance_of_1) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 1, 1, 1, 0, 0, 0},
@@ -581,7 +632,39 @@ TEST(king, can_move_in_any_direction_at_distance_of_1) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
+}
+
+TEST(king, cannot_move_where_it_will_be_in_check) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, WK, __, __, __, __},
+            {__, __, __, __, __, BQ, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
+
+    bool playableMoves[8][8] = {
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 0, 1, 0, 0, 0},
+        {0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(king, can_castle_kingside) {
@@ -782,7 +865,7 @@ TEST(rook, can_move_in_column_or_row_at_any_distance) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WR);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 0},
@@ -793,7 +876,7 @@ TEST(rook, can_move_in_column_or_row_at_any_distance) {
         {0, 0, 0, 1, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(rook, cannot_go_over_pieces) {
@@ -814,7 +897,7 @@ TEST(rook, cannot_go_over_pieces) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WR);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 0},
@@ -825,7 +908,7 @@ TEST(rook, cannot_go_over_pieces) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(bishop, can_move_in_diagonal_at_any_distance) {
@@ -846,7 +929,7 @@ TEST(bishop, can_move_in_diagonal_at_any_distance) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WB);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {1, 0, 0, 0, 0, 0, 1, 0},
         {0, 1, 0, 0, 0, 1, 0, 0},
         {0, 0, 1, 0, 1, 0, 0, 0},
@@ -857,7 +940,7 @@ TEST(bishop, can_move_in_diagonal_at_any_distance) {
         {0, 0, 0, 0, 0, 0, 0, 1},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(bishop, cannot_go_over_pieces) {
@@ -878,7 +961,7 @@ TEST(bishop, cannot_go_over_pieces) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WB);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 0, 0, 1, 0, 0},
         {0, 0, 1, 0, 1, 0, 0, 0},
@@ -889,7 +972,7 @@ TEST(bishop, cannot_go_over_pieces) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(queen, can_move_in_column_or_row_or_diagonal_at_any_distance) {
@@ -910,7 +993,7 @@ TEST(queen, can_move_in_column_or_row_or_diagonal_at_any_distance) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WQ);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {1, 0, 0, 1, 0, 0, 1, 0},
         {0, 1, 0, 1, 0, 1, 0, 0},
         {0, 0, 1, 1, 1, 0, 0, 0},
@@ -921,7 +1004,7 @@ TEST(queen, can_move_in_column_or_row_or_diagonal_at_any_distance) {
         {0, 0, 0, 1, 0, 0, 0, 1},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
 TEST(queen, cannot_go_over_pieces) {
@@ -942,7 +1025,7 @@ TEST(queen, cannot_go_over_pieces) {
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WQ);
 
-    bool validMoves[8][8] = {
+    bool playableMoves[8][8] = {
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 1, 0, 1, 0, 0},
         {0, 0, 1, 1, 1, 0, 0, 0},
@@ -953,10 +1036,10 @@ TEST(queen, cannot_go_over_pieces) {
         {0, 0, 0, 0, 0, 0, 0, 0},
     };
 
-    ASSERT_VALID_MOVES_MATCH(&gameSnapshot, pieceToMove, validMoves);
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
-TEST(isKingInCheck, should_return_true_when_piece_can_eat_king) {
+TEST(isPlayerInCheck, should_return_true_when_a_piece_can_eat_king) {
     GameSnapshot gameSnapshot = {
         {
             {__, __, __, __, __, __, __, __},
@@ -973,10 +1056,10 @@ TEST(isKingInCheck, should_return_true_when_piece_can_eat_king) {
         false,
     };
 
-    REQUIRE_TRUE(isKingInCheck(&gameSnapshot));
+    REQUIRE_TRUE(isPlayerInCheck(&gameSnapshot, WHITE));
 }
 
-TEST(isKingInCheck, should_return_false_when_none_piece_can_eat_king) {
+TEST(isPlayerInCheck, should_return_false_when_none_piece_can_eat_king) {
     GameSnapshot gameSnapshot = {
         {
             {__, __, __, __, __, __, __, __},
@@ -993,5 +1076,5 @@ TEST(isKingInCheck, should_return_false_when_none_piece_can_eat_king) {
         false,
     };
 
-    REQUIRE_FALSE(isKingInCheck(&gameSnapshot));
+    REQUIRE_FALSE(isPlayerInCheck(&gameSnapshot, WHITE));
 }

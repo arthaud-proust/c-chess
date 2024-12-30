@@ -102,6 +102,8 @@ Color pieceColor(Piece piece);
 
 void moveTo(Piece board[COLS][ROWS], Position origin, Position destination);
 
+GameSnapshot appliedMove(const GameSnapshot *gameSnapshot, Position origin, Position destination);
+
 Piece pieceAtColRow(Piece board[COLS][ROWS], int col, int row);
 
 Piece pieceAt(Piece board[COLS][ROWS], Position position);
@@ -120,9 +122,13 @@ bool isDiagonalEmptyBetween(Piece board[COLS][ROWS], Position start, Position en
 
 bool isPositionOnBoard(Position position);
 
-bool isMoveValid(GameSnapshot *gameSnapshot, Position origin, Position destination);
+bool isMoveValid(const GameSnapshot *gameSnapshot, Position origin, Position destination);
 
-bool isKingInCheck(GameSnapshot *gameSnapshot);
+bool isPieceThreatened(const GameSnapshot *gameSnapshot, Position piece);
+
+bool isPlayerInCheck(GameSnapshot *gameSnapshot, Color player);
+
+bool canPlay(GameSnapshot *gameSnapshot, Position origin, Position destination);
 
 void constructBoard(Piece board[COLS][ROWS]);
 
