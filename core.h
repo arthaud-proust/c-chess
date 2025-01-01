@@ -53,6 +53,9 @@ extern const int COLS;
 extern const int ASCII_LOWER_A;
 extern const int ASCII_ONE;
 
+const int WHITE_PAWN_ROW_PROMOTION;
+const int BLACK_PAWN_ROW_PROMOTION;
+
 typedef struct {
     int col;
     int row;
@@ -64,6 +67,11 @@ typedef struct {
     bool hasWhiteLostCastling;
     bool hasBlackLostCastling;
 } GameSnapshot;
+
+typedef struct {
+    GameSnapshot gameSnapshot;
+    bool success;
+} ActionResult;
 
 typedef struct {
     Position kingOrigin;
@@ -129,6 +137,14 @@ bool isPieceThreatened(const GameSnapshot *gameSnapshot, Position piece);
 bool isPlayerInCheck(GameSnapshot *gameSnapshot, Color player);
 
 bool canPlay(GameSnapshot *gameSnapshot, Position origin, Position destination);
+
+bool canPromote(GameSnapshot *gameSnapshot, Position origin);
+
+bool canPromoteTo(GameSnapshot *gameSnapshot, Position origin, Piece promotion);
+
+ActionResult play(GameSnapshot *gameSnapshot, Position origin, Position destination);
+
+ActionResult promoteTo(GameSnapshot *gameSnapshot, Position origin, Piece promotion);
 
 void constructBoard(Piece board[COLS][ROWS]);
 

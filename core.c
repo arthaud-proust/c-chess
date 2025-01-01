@@ -11,6 +11,9 @@ const int COLS = 8;
 const int ASCII_LOWER_A = 97;
 const int ASCII_ONE = 49;
 
+const int WHITE_PAWN_ROW_PROMOTION = 7;
+const int BLACK_PAWN_ROW_PROMOTION = 0;
+
 const CastlingPositions WHITE_CASTLING_KING_SIDE = {
     {4, 0},
     {6, 0},
@@ -142,12 +145,67 @@ GameSnapshot appliedMove(const GameSnapshot *gameSnapshot, const Position origin
         }
     }
 
-    nextGameSnapshot.board[destination.col][destination.row] = nextGameSnapshot.board[origin.col][origin.row];
-    nextGameSnapshot.board[origin.col][origin.row] = __;
+    const Piece pieceMoved = pieceAt(gameSnapshot->board, origin);
+
+    moveTo(nextGameSnapshot.board, origin, destination);
+
+    if (
+        pieceMoved == WK
+        && areSamePositions(origin, WHITE_CASTLING_KING_SIDE.kingOrigin)
+        && areSamePositions(destination, WHITE_CASTLING_KING_SIDE.kingDestination)
+    ) {
+        moveTo(nextGameSnapshot.board, WHITE_CASTLING_KING_SIDE.rookOrigin, WHITE_CASTLING_KING_SIDE.rookDestination);
+    }
+
+    if (
+        pieceMoved == WK
+        && areSamePositions(origin, WHITE_CASTLING_QUEEN_SIDE.kingOrigin)
+        && areSamePositions(destination, WHITE_CASTLING_QUEEN_SIDE.kingDestination)
+    ) {
+        moveTo(nextGameSnapshot.board, WHITE_CASTLING_QUEEN_SIDE.rookOrigin, WHITE_CASTLING_QUEEN_SIDE.rookDestination);
+    }
+
+    if (
+        pieceMoved == BK
+        && areSamePositions(origin, BLACK_CASTLING_KING_SIDE.kingOrigin)
+        && areSamePositions(destination, BLACK_CASTLING_KING_SIDE.kingDestination)
+    ) {
+        moveTo(nextGameSnapshot.board, BLACK_CASTLING_KING_SIDE.rookOrigin, BLACK_CASTLING_KING_SIDE.rookDestination);
+    }
+
+    if (
+        pieceMoved == BK
+        && areSamePositions(origin, BLACK_CASTLING_QUEEN_SIDE.kingOrigin)
+        && areSamePositions(destination, BLACK_CASTLING_QUEEN_SIDE.kingDestination)
+    ) {
+        moveTo(nextGameSnapshot.board, BLACK_CASTLING_QUEEN_SIDE.rookOrigin, BLACK_CASTLING_QUEEN_SIDE.rookDestination);
+    }
 
     nextGameSnapshot.currentPlayer = gameSnapshot->currentPlayer == WHITE ? BLACK : WHITE;
     nextGameSnapshot.hasWhiteLostCastling = gameSnapshot->hasWhiteLostCastling;
     nextGameSnapshot.hasBlackLostCastling = gameSnapshot->hasBlackLostCastling;
+
+    if (pieceMoved == WK || pieceMoved == WR) {
+        nextGameSnapshot.hasWhiteLostCastling = true;
+    }
+
+    if (pieceMoved == BK || pieceMoved == BR) {
+        nextGameSnapshot.hasBlackLostCastling = true;
+    }
+
+    return nextGameSnapshot;
+}
+
+GameSnapshot appliedPromotion(const GameSnapshot *gameSnapshot, const Position origin, const Piece promotion) {
+    GameSnapshot nextGameSnapshot = {};
+
+    for (int col = 0; col < COLS; col++) {
+        for (int row = 0; row < ROWS; row++) {
+            nextGameSnapshot.board[col][row] = gameSnapshot->board[col][row];
+        }
+    }
+
+    nextGameSnapshot.board[origin.col][origin.row] = promotion;
 
     return nextGameSnapshot;
 }
@@ -364,6 +422,12 @@ bool isPlayerInCheck(GameSnapshot *gameSnapshot, const Color player) {
 }
 
 bool canPlay(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
+    const Color pieceColorAtOrigin = pieceColor(pieceAt(gameSnapshot->board, origin));
+
+    if (pieceColorAtOrigin != gameSnapshot->currentPlayer) {
+        return false;
+    }
+
     if (!isMoveValid(gameSnapshot, origin, destination)) {
         return false;
     }
@@ -371,6 +435,59 @@ bool canPlay(GameSnapshot *gameSnapshot, const Position origin, const Position d
     GameSnapshot nextSnapshot = appliedMove(gameSnapshot, origin, destination);
 
     return !isPlayerInCheck(&nextSnapshot, gameSnapshot->currentPlayer);
+}
+
+bool canPromote(GameSnapshot *gameSnapshot, const Position origin) {
+    const Piece piece = pieceAt(gameSnapshot->board, origin);
+    const Color color = pieceColor(piece);
+
+    if (color != gameSnapshot->currentPlayer) {
+        return false;
+    }
+
+    if (piece == WP) {
+        return origin.row == WHITE_PAWN_ROW_PROMOTION;
+    }
+
+    if (piece == BP) {
+        return origin.row == BLACK_PAWN_ROW_PROMOTION;
+    }
+
+    return false;
+}
+
+bool canPromoteTo(GameSnapshot *gameSnapshot, const Position origin, const Piece promotion) {
+    return canPromote(gameSnapshot, origin)
+           && pieceColor(promotion) == gameSnapshot->currentPlayer
+           && (
+               promotion == WQ
+               || promotion == WB
+               || promotion == WR
+               || promotion == WN
+               || promotion == BQ
+               || promotion == BB
+               || promotion == BR
+               || promotion == BN
+           );
+}
+
+
+ActionResult play(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
+    const ActionResult result = {
+        appliedMove(gameSnapshot, origin, destination),
+        canPlay(gameSnapshot, origin, destination)
+    };
+
+    return result;
+}
+
+ActionResult promoteTo(GameSnapshot *gameSnapshot, const Position origin, const Piece promotion) {
+    const ActionResult result = {
+        appliedPromotion(gameSnapshot, origin, promotion),
+        canPromote(gameSnapshot, origin)
+    };
+
+    return result;
 }
 
 void constructBoard(Piece board[COLS][ROWS]) {

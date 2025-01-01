@@ -215,6 +215,38 @@ TEST(isDiagonalEmptyBetween, return_false_if_piece_between_start_and_end) {
     CHECK_FALSE(isDiagonalEmptyBetween(board2, positionOfPiece(board2, BQ), positionOfPiece(board2, WK)));
 }
 
+TEST(all, cannot_move_other_color) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, BP, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, BP);
+
+    bool playableMoves[8][8] = {
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
+}
+
 TEST(all, cannot_move_piece_on_another_if_same_colour) {
     GameSnapshot gameSnapshot = {
         {
@@ -455,7 +487,7 @@ TEST(pawn, black_can_move_1_cell_front_when_not_at_start_row) {
             {__, __, __, __, __, __, __, __},
             {__, __, __, __, __, __, __, __},
         },
-        WHITE,
+        BLACK,
         false,
         false,
     };
@@ -487,7 +519,7 @@ TEST(pawn, black_can_move_1_or_2_cells_front_when_at_start_row) {
             {__, __, __, __, __, __, __, __},
             {__, __, __, __, __, __, __, __},
         },
-        WHITE,
+        BLACK,
         false,
         false,
     };
@@ -519,7 +551,7 @@ TEST(pawn, black_cannot_move_2_cells_front_when_piece_in_front_of_it) {
             {__, __, __, __, __, __, __, __},
             {__, __, __, __, __, __, __, __},
         },
-        WHITE,
+        BLACK,
         false,
         false,
     };
@@ -551,7 +583,7 @@ TEST(pawn, black_can_eat_at_front_left_or_front_right) {
             {__, __, __, __, __, __, __, __},
             {__, __, __, __, __, __, __, __},
         },
-        WHITE,
+        BLACK,
         false,
         false,
     };
@@ -1077,4 +1109,208 @@ TEST(isPlayerInCheck, should_return_false_when_none_piece_can_eat_king) {
     };
 
     REQUIRE_FALSE(isPlayerInCheck(&gameSnapshot, WHITE));
+}
+
+TEST(play, mark_castling_at_lost_if_king_moved) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WK, BR, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    Position origin = positionOfPiece(gameSnapshot.board, WK);
+    Position destination = positionOfPiece(gameSnapshot.board, BR);
+
+    ActionResult result = play(&gameSnapshot, origin, destination);
+    REQUIRE_TRUE(result.gameSnapshot.hasWhiteLostCastling);
+}
+
+TEST(play, mark_castling_at_lost_if_rook_moved) {
+    GameSnapshot gameSnapshot = {
+        {
+            {WR, BR, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    Position origin = positionOfPiece(gameSnapshot.board, WR);
+    Position destination = positionOfPiece(gameSnapshot.board, BR);
+
+    ActionResult result = play(&gameSnapshot, origin, destination);
+    REQUIRE_TRUE(result.gameSnapshot.hasWhiteLostCastling);
+}
+
+TEST(play, do_not_change_lost_castling_if_king_and_rook_unmoved) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, WP, __, __, __, __, __, __},
+            {__, __, BP, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    Position origin = positionOfPiece(gameSnapshot.board, WP);
+    Position destination = positionOfPiece(gameSnapshot.board, BP);
+
+    ActionResult result = play(&gameSnapshot, origin, destination);
+    REQUIRE_FALSE(result.gameSnapshot.hasWhiteLostCastling);
+}
+
+TEST(play, move_king_and_rook_when_castling_king_side) {
+    GameSnapshot gameSnapshot = {
+        {
+            {WR, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WK, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    Position origin = positionOfPiece(gameSnapshot.board, WK);
+    Position destination = {2, 0};
+
+    ActionResult result = play(&gameSnapshot, origin, destination);
+    REQUIRE_TRUE(result.success);
+    REQUIRE_EQ(pieceAtColRow(result.gameSnapshot.board, 2, 0), WK);
+    REQUIRE_EQ(pieceAtColRow(result.gameSnapshot.board, 3, 0), WR);
+}
+
+TEST(play, move_king_and_rook_when_castling_queen_side) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WK, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WR, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    Position origin = positionOfPiece(gameSnapshot.board, WK);
+    Position destination = {6, 0};
+
+    ActionResult result = play(&gameSnapshot, origin, destination);
+    REQUIRE_TRUE(result.success);
+    REQUIRE_EQ(pieceAtColRow(result.gameSnapshot.board, 6, 0), WK);
+    REQUIRE_EQ(pieceAtColRow(result.gameSnapshot.board, 5, 0), WR);
+}
+
+TEST(canPromote, return_true_when_white_pawn_is_at_end_of_board) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, WP},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    Position origin = positionOfPiece(gameSnapshot.board, WP);
+
+    REQUIRE_TRUE(canPromote(&gameSnapshot, origin));
+}
+
+TEST(canPromote, return_true_when_black_pawn_is_at_end_of_board) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {BP, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        BLACK,
+        false,
+        false,
+    };
+    Position origin = positionOfPiece(gameSnapshot.board, BP);
+
+    REQUIRE_TRUE(canPromote(&gameSnapshot, origin));
+}
+
+TEST(canPromoteTo, return_false_if_promoting_other_color) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, WP},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    Position origin = positionOfPiece(gameSnapshot.board, WP);
+
+    REQUIRE_TRUE(canPromoteTo(&gameSnapshot, origin, WQ));
+}
+
+TEST(promote, replace_pawn_by_promotion_piece) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, WP},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    Position origin = positionOfPiece(gameSnapshot.board, WP);
+
+    ActionResult result = promoteTo(&gameSnapshot, origin, WQ);
+    REQUIRE_TRUE(result.success);
 }
