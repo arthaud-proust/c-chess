@@ -103,6 +103,11 @@ int main(void) {
             char destinationStr[3];
 
             printf("\n\nIt's %s's turn", gameSnapshot.currentPlayer == WHITE ? "White" : "Black");
+
+            if (isPlayerInCheck(&gameSnapshot, gameSnapshot.currentPlayer)) {
+                printf("\nYour are in check");
+            }
+
             printf("\nWhat piece do you move (in algebraic notation)? ");
             scanf("%2s", originStr);
             printf("\nWhere do you move it ? ");
