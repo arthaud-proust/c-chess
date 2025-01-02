@@ -34,6 +34,26 @@ const char *pieceIcon(const Piece piece) {
     return " ";
 }
 
+Piece pieceFromChar(const Color color, const char pieceChar) {
+    switch (pieceChar) {
+        case 'K':
+            return color == WHITE ? WK : BK;
+        case 'Q':
+            return color == WHITE ? WQ : BQ;
+        case 'R':
+            return color == WHITE ? WR : BR;
+        case 'B':
+            return color == WHITE ? WB : BB;
+        case 'N':
+            return color == WHITE ? WN : BN;
+        case 'P':
+            return color == WHITE ? WP : BP;
+        default:
+            return __;
+    }
+    return __;
+}
+
 void renderBoard(Piece board[COLS][ROWS]) {
     for (int row = ROWS - 1; row >= 0; row--) {
         printf("\n%d", row + 1);
@@ -53,42 +73,64 @@ Position positionFromStr(const char str[2]) {
     return position;
 }
 
-int main(void) {
-    Color currentPlayer = WHITE;
+Piece askPromotion(GameSnapshot *gameSnapshot, const Position destination) {
+    Piece piece;
+    do {
+        printf("\nHow do you promote your pawn? (Q/R/B/N) ");
+        printf("\nQ: Queen ");
+        printf("\nR: Rook ");
+        printf("\nB: Bishop ");
+        printf("\nN: Knight ");
+        printf("\nYou choice: ");
 
-    Piece board[COLS][ROWS];
-    fillBoardWithInitialPieces(board);
+        char pieceChar;
+        scanf("%1s", &pieceChar);
+        piece = pieceFromChar(gameSnapshot->currentPlayer, pieceChar);
+    } while (canPromoteTo(gameSnapshot, destination, piece));
+
+    return piece;
+}
+
+int main(void) {
+    GameSnapshot gameSnapshot = initialGameSnapshot();
 
     while (true) {
-        renderBoard(board);
-
-        Position origin;
-        Position destination;
+        renderBoard(gameSnapshot.board);
 
         bool isInvalid = true;
         do {
             char originStr[3];
             char destinationStr[3];
 
-            printf("\n\nIt's %s's turn", currentPlayer == WHITE ? "White" : "Black");
+            printf("\n\nIt's %s's turn", gameSnapshot.currentPlayer == WHITE ? "White" : "Black");
             printf("\nWhat piece do you move (in algebraic notation)? ");
             scanf("%2s", originStr);
             printf("\nWhere do you move it ? ");
             scanf("%2s", destinationStr);
 
-            origin = positionFromStr(originStr);
-            destination = positionFromStr(destinationStr);
+            const Position origin = positionFromStr(originStr);
+            const Position destination = positionFromStr(destinationStr);
 
-            if (isMoveValid(board, currentPlayer, origin, destination)) {
+            const ActionResult playResult = play(&gameSnapshot, origin, destination);
+
+            if (playResult.success) {
                 isInvalid = false;
+                gameSnapshot = playResult.gameSnapshot;
+
+                if (canPromote(&gameSnapshot, destination)) {
+                    const Piece promotion = askPromotion(&gameSnapshot, destination);
+                    const ActionResult promoteResult = promoteTo(&gameSnapshot, destination, promotion);
+
+                    if (promoteResult.success) {
+                        gameSnapshot = playResult.gameSnapshot;
+                    } else {
+                        printf("\nError");
+                    }
+                }
             } else {
                 printf("\n%s -> %s is invalid! Please try again.", originStr, destinationStr);
             }
         } while (isInvalid);
-
-        moveTo(board, origin, destination);
-
-        currentPlayer = currentPlayer == WHITE ? BLACK : WHITE;
     }
     return 0;
 }

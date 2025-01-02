@@ -181,7 +181,6 @@ GameSnapshot appliedMove(const GameSnapshot *gameSnapshot, const Position origin
         moveTo(nextGameSnapshot.board, BLACK_CASTLING_QUEEN_SIDE.rookOrigin, BLACK_CASTLING_QUEEN_SIDE.rookDestination);
     }
 
-    nextGameSnapshot.currentPlayer = gameSnapshot->currentPlayer == WHITE ? BLACK : WHITE;
     nextGameSnapshot.hasWhiteLostCastling = gameSnapshot->hasWhiteLostCastling;
     nextGameSnapshot.hasBlackLostCastling = gameSnapshot->hasBlackLostCastling;
 
@@ -191,6 +190,11 @@ GameSnapshot appliedMove(const GameSnapshot *gameSnapshot, const Position origin
 
     if (pieceMoved == BK || pieceMoved == BR) {
         nextGameSnapshot.hasBlackLostCastling = true;
+    }
+
+    nextGameSnapshot.currentPlayer = gameSnapshot->currentPlayer;
+    if (!canPromote(&nextGameSnapshot, destination)) {
+        nextGameSnapshot.currentPlayer = gameSnapshot->currentPlayer == WHITE ? BLACK : WHITE;
     }
 
     return nextGameSnapshot;
@@ -456,19 +460,21 @@ bool canPromote(GameSnapshot *gameSnapshot, const Position origin) {
     return false;
 }
 
+bool isAPromotionPiece(const Piece piece) {
+    return piece == WQ
+           || piece == WB
+           || piece == WR
+           || piece == WN
+           || piece == BQ
+           || piece == BB
+           || piece == BR
+           || piece == BN;
+}
+
 bool canPromoteTo(GameSnapshot *gameSnapshot, const Position origin, const Piece promotion) {
     return canPromote(gameSnapshot, origin)
            && pieceColor(promotion) == gameSnapshot->currentPlayer
-           && (
-               promotion == WQ
-               || promotion == WB
-               || promotion == WR
-               || promotion == WN
-               || promotion == BQ
-               || promotion == BB
-               || promotion == BR
-               || promotion == BN
-           );
+           && isAPromotionPiece(promotion);
 }
 
 
@@ -524,4 +530,16 @@ void fillBoardWithInitialPieces(Piece board[COLS][ROWS]) {
     for (int row = 0; row < ROWS; row++) {
         board[row][6] = BP;
     }
+}
+
+GameSnapshot initialGameSnapshot() {
+    const GameSnapshot gameSnapshot = {
+        {},
+        WHITE,
+        false,
+        false
+    };
+    fillBoardWithInitialPieces(gameSnapshot.board);
+
+    return gameSnapshot;
 }

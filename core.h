@@ -150,4 +150,6 @@ void constructBoard(Piece board[COLS][ROWS]);
 
 void fillBoardWithInitialPieces(Piece board[COLS][ROWS]);
 
+GameSnapshot initialGameSnapshot();
+
 #endif //CORE_H

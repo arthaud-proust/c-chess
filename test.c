@@ -603,6 +603,30 @@ TEST(pawn, black_can_eat_at_front_left_or_front_right) {
     ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
 }
 
+TEST(pawn, dont_change_player_if_pawn_is_promoting) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, BP},
+            {__, __, __, __, __, __, WP, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
+    const Position destination = positionOfPiece(gameSnapshot.board, BP);
+
+    const ActionResult result = play(&gameSnapshot, pieceToMove, destination);
+    CHECK_TRUE(result.success);
+    CHECK_EQ(result.gameSnapshot.currentPlayer, WHITE);
+}
+
 TEST(knight, can_move_in_l_shape) {
     GameSnapshot gameSnapshot = {
         {
