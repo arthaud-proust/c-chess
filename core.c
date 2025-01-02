@@ -550,8 +550,8 @@ void fillBoardWithInitialPieces(Piece board[COLS][ROWS]) {
     board[0][0] = WR;
     board[1][0] = WN;
     board[2][0] = WB;
-    board[4][0] = WQ;
-    board[3][0] = WK;
+    board[4][0] = WK;
+    board[3][0] = WQ;
     board[5][0] = WB;
     board[6][0] = WN;
     board[7][0] = WR;
@@ -562,8 +562,8 @@ void fillBoardWithInitialPieces(Piece board[COLS][ROWS]) {
     board[0][7] = BR;
     board[1][7] = BN;
     board[2][7] = BB;
-    board[4][7] = BQ;
-    board[3][7] = BK;
+    board[4][7] = BK;
+    board[3][7] = BQ;
     board[5][7] = BB;
     board[6][7] = BN;
     board[7][7] = BR;
