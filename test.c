@@ -24,197 +24,6 @@ void ASSERT_PLAYABLE_MOVES_MATCH(GameSnapshot *gameSnapshot, const Position piec
     }
 }
 
-TEST(isColumnEmptyBetween, return_false_if_not_same_column) {
-    Piece board[8][8] = {
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-
-    const Position start = {0, 0};
-    const Position end = {1, 0};
-
-    CHECK_FALSE(isColumnEmptyBetween(board, start, end));
-    CHECK_FALSE(isColumnEmptyBetween(board, end, start));
-}
-
-TEST(isColumnEmptyBetween, return_true_if_no_piece_between_start_and_end) {
-    Piece board[8][8] = {
-        {WP, __, WP, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-
-    const Position start = {0, 0};
-    const Position end = {0, 2};
-
-    CHECK_TRUE(isColumnEmptyBetween(board, start, end));
-    CHECK_TRUE(isColumnEmptyBetween(board, end, start));
-}
-
-TEST(isColumnEmptyBetween, return_false_if_piece_between_start_and_end) {
-    Piece board[8][8] = {
-        {WP, WP, WP, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-
-    const Position start = {0, 0};
-    const Position end = {0, 2};
-
-    CHECK_FALSE(isColumnEmptyBetween(board, start, end));
-    CHECK_FALSE(isColumnEmptyBetween(board, end, start));
-}
-
-TEST(isRowEmptyBetween, return_false_if_not_same_row) {
-    Piece board[8][8] = {
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-
-    const Position start = {0, 0};
-    const Position end = {0, 2};
-
-    CHECK_FALSE(isRowEmptyBetween(board, start, end));
-    CHECK_FALSE(isRowEmptyBetween(board, end, start));
-}
-
-TEST(isRowEmptyBetween, return_true_if_no_piece_between_start_and_end) {
-    Piece board[8][8] = {
-        {WP, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {WP, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-
-    const Position start = {0, 0};
-    const Position end = {2, 0};
-
-    CHECK_TRUE(isRowEmptyBetween(board, start, end));
-    CHECK_TRUE(isRowEmptyBetween(board, end, start));
-}
-
-TEST(isRowEmptyBetween, return_false_if_piece_between_start_and_end) {
-    Piece board[8][8] = {
-        {WP, __, __, __, __, __, __, __},
-        {WP, __, __, __, __, __, __, __},
-        {WP, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-
-    const Position start = {0, 0};
-    const Position end = {2, 0};
-
-    CHECK_FALSE(isRowEmptyBetween(board, start, end));
-    CHECK_FALSE(isRowEmptyBetween(board, end, start));
-}
-
-TEST(isDiagonalEmptyBetween, return_false_if_not_same_diagonal) {
-    Piece board[8][8] = {
-        {WK, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, BK, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-
-    const Position start = positionOfPiece(board, WK);
-    const Position end = positionOfPiece(board, BK);
-
-    CHECK_FALSE(isDiagonalEmptyBetween(board, start, end));
-    CHECK_FALSE(isDiagonalEmptyBetween(board, end, start));
-}
-
-TEST(isDiagonalEmptyBetween, return_true_if_no_piece_between_start_and_end) {
-    Piece board1[8][8] = {
-        {WK, WP, WP, WP, __, __, __, __},
-        {WP, __, WP, WP, __, __, __, __},
-        {WP, WP, __, WP, __, __, __, __},
-        {WP, WP, WP, BQ, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-    Piece board2[8][8] = {
-        {WP, WP, WP, BQ, __, __, __, __},
-        {WP, WP, __, WP, __, __, __, __},
-        {WP, __, WP, WP, __, __, __, __},
-        {WK, WP, WP, WP, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-
-    CHECK_TRUE(isDiagonalEmptyBetween(board1, positionOfPiece(board1, WK), positionOfPiece(board1, BQ)));
-    CHECK_TRUE(isDiagonalEmptyBetween(board1, positionOfPiece(board1, BQ), positionOfPiece(board1, WK)));
-
-    CHECK_TRUE(isDiagonalEmptyBetween(board2, positionOfPiece(board2, WK), positionOfPiece(board2, BQ)));
-    CHECK_TRUE(isDiagonalEmptyBetween(board2, positionOfPiece(board2, BQ), positionOfPiece(board2, WK)));
-}
-
-TEST(isDiagonalEmptyBetween, return_false_if_piece_between_start_and_end) {
-    Piece board1[8][8] = {
-        {WK, WP, WP, WP, __, __, __, __},
-        {WP, WP, WP, WP, __, __, __, __},
-        {WP, WP, WP, WP, __, __, __, __},
-        {WP, WP, WP, BQ, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-    Piece board2[8][8] = {
-        {WP, WP, WP, BQ, __, __, __, __},
-        {WP, WP, WP, WP, __, __, __, __},
-        {WP, WP, WP, WP, __, __, __, __},
-        {WK, WP, WP, WP, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-        {__, __, __, __, __, __, __, __},
-    };
-
-    CHECK_FALSE(isDiagonalEmptyBetween(board1, positionOfPiece(board1, WK), positionOfPiece(board1, BQ)));
-    CHECK_FALSE(isDiagonalEmptyBetween(board1, positionOfPiece(board1, BQ), positionOfPiece(board1, WK)));
-
-    CHECK_FALSE(isDiagonalEmptyBetween(board2, positionOfPiece(board2, WK), positionOfPiece(board2, BQ)));
-    CHECK_FALSE(isDiagonalEmptyBetween(board2, positionOfPiece(board2, BQ), positionOfPiece(board2, WK)));
-}
-
 TEST(all, cannot_move_other_color) {
     GameSnapshot gameSnapshot = {
         {
@@ -311,7 +120,7 @@ TEST(all, cannot_move_piece_out_of_board) {
 
     const Position outOfBoard = {3, 8};
     REQUIRE_EQ(
-        isMoveValid(&gameSnapshot, pieceToMove, outOfBoard),
+        canPlay(&gameSnapshot, pieceToMove, outOfBoard),
         false
     );
 }
@@ -742,7 +551,7 @@ TEST(king, can_castle_kingside) {
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
     const Position destination = {6, 0};
 
-    REQUIRE_TRUE(isMoveValid(&gameSnapshot, pieceToMove, destination));
+    REQUIRE_TRUE(canPlay(&gameSnapshot, pieceToMove, destination));
 }
 
 TEST(king, cannot_castle_kingside_when_piece_between) {
@@ -779,8 +588,8 @@ TEST(king, cannot_castle_kingside_when_piece_between) {
     const Position pieceToMove = positionOfPiece(gameSnapshot1.board, WK);
     const Position destination = {6, 0};
 
-    REQUIRE_FALSE(isMoveValid(&gameSnapshot1, pieceToMove, destination));
-    REQUIRE_FALSE(isMoveValid(&gameSnapshot2, pieceToMove, destination));
+    REQUIRE_FALSE(canPlay(&gameSnapshot1, pieceToMove, destination));
+    REQUIRE_FALSE(canPlay(&gameSnapshot2, pieceToMove, destination));
 }
 
 TEST(king, cannot_castle_kingside_when_lost_castling) {
@@ -802,7 +611,7 @@ TEST(king, cannot_castle_kingside_when_lost_castling) {
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
     const Position destination = {6, 0};
 
-    REQUIRE_FALSE(isMoveValid(&gameSnapshot, pieceToMove, destination));
+    REQUIRE_FALSE(canPlay(&gameSnapshot, pieceToMove, destination));
 }
 
 TEST(king, can_castle_queenside) {
@@ -824,7 +633,7 @@ TEST(king, can_castle_queenside) {
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
     const Position destination = {2, 0};
 
-    REQUIRE_TRUE(isMoveValid(&gameSnapshot, pieceToMove, destination));
+    REQUIRE_TRUE(canPlay(&gameSnapshot, pieceToMove, destination));
 }
 
 TEST(king, cannot_castle_queenside_when_piece_between) {
@@ -876,9 +685,9 @@ TEST(king, cannot_castle_queenside_when_piece_between) {
     const Position pieceToMove = positionOfPiece(gameSnapshot1.board, WK);
     const Position destination = {2, 0};
 
-    REQUIRE_FALSE(isMoveValid(&gameSnapshot1, pieceToMove, destination));
-    REQUIRE_FALSE(isMoveValid(&gameSnapshot2, pieceToMove, destination));
-    REQUIRE_FALSE(isMoveValid(&gameSnapshot3, pieceToMove, destination));
+    REQUIRE_FALSE(canPlay(&gameSnapshot1, pieceToMove, destination));
+    REQUIRE_FALSE(canPlay(&gameSnapshot2, pieceToMove, destination));
+    REQUIRE_FALSE(canPlay(&gameSnapshot3, pieceToMove, destination));
 }
 
 TEST(king, cannot_castle_queenside_when_lost_castling) {
@@ -900,7 +709,7 @@ TEST(king, cannot_castle_queenside_when_lost_castling) {
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
     const Position destination = {2, 0};
 
-    REQUIRE_FALSE(isMoveValid(&gameSnapshot, pieceToMove, destination));
+    REQUIRE_FALSE(canPlay(&gameSnapshot, pieceToMove, destination));
 }
 
 TEST(rook, can_move_in_column_or_row_at_any_distance) {
@@ -1225,8 +1034,8 @@ TEST(play, move_king_and_rook_when_castling_king_side) {
 
     ActionResult result = play(&gameSnapshot, origin, destination);
     REQUIRE_TRUE(result.success);
-    REQUIRE_EQ(pieceAtColRow(result.gameSnapshot.board, 2, 0), WK);
-    REQUIRE_EQ(pieceAtColRow(result.gameSnapshot.board, 3, 0), WR);
+    REQUIRE_EQ(result.gameSnapshot.board[2][0], WK);
+    REQUIRE_EQ(result.gameSnapshot.board[3][0], WR);
 }
 
 TEST(play, move_king_and_rook_when_castling_queen_side) {
@@ -1250,8 +1059,8 @@ TEST(play, move_king_and_rook_when_castling_queen_side) {
 
     ActionResult result = play(&gameSnapshot, origin, destination);
     REQUIRE_TRUE(result.success);
-    REQUIRE_EQ(pieceAtColRow(result.gameSnapshot.board, 6, 0), WK);
-    REQUIRE_EQ(pieceAtColRow(result.gameSnapshot.board, 5, 0), WR);
+    REQUIRE_EQ(result.gameSnapshot.board[6][0], WK);
+    REQUIRE_EQ(result.gameSnapshot.board[5][0], WR);
 }
 
 TEST(canPromote, return_true_when_white_pawn_is_at_end_of_board) {

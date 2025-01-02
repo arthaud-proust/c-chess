@@ -51,7 +51,6 @@ Piece pieceFromChar(const Color color, const char pieceChar) {
         default:
             return __;
     }
-    return __;
 }
 
 void renderBoard(Piece board[COLS][ROWS]) {

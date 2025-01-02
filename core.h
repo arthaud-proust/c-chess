@@ -88,74 +88,24 @@ const CastlingPositions BLACK_CASTLING_KING_SIDE;
 
 const CastlingPositions BLACK_CASTLING_QUEEN_SIDE;
 
-bool areSamePositions(Position a, Position b);
-
-Position withSameRow(Position position, int col);
-
-Position withSameCol(Position position, int row);
-
-Position atTopOf(Position position, int distance);
-
-Position atBottomOf(Position position, int distance);
-
-Position atLeftOf(Position position, int distance);
-
-Position atRightOf(Position position, int distance);
-
-int rowsBetween(Position a, Position b);
-
-int colsBetween(Position a, Position b);
-
-Color pieceColor(Piece piece);
-
-void moveTo(Piece board[COLS][ROWS], Position origin, Position destination);
-
-GameSnapshot appliedMove(const GameSnapshot *gameSnapshot, Position origin, Position destination);
-
-Piece pieceAtColRow(Piece board[COLS][ROWS], int col, int row);
-
-Piece pieceAt(Piece board[COLS][ROWS], Position position);
-
-Position positionOfPiece(Piece board[COLS][ROWS], Piece piece);
-
-bool isEmptyAtColRow(Piece board[COLS][ROWS], int col, int row);
-
-bool isEmptyAt(Piece board[COLS][ROWS], Position position);
-
-bool isColumnEmptyBetween(Piece board[COLS][ROWS], Position start, Position end);
-
-bool isRowEmptyBetween(Piece board[COLS][ROWS], Position start, Position end);
-
-bool isDiagonalEmptyBetween(Piece board[COLS][ROWS], Position start, Position end);
-
-bool isPositionOnBoard(Position position);
-
-bool isMoveValid(const GameSnapshot *gameSnapshot, Position origin, Position destination);
-
-bool isPieceThreatened(const GameSnapshot *gameSnapshot, Position piece);
-
-bool isPlayerInCheck(GameSnapshot *gameSnapshot, Color player);
-
-bool isCurrentPlayerStalemated(GameSnapshot *gameSnapshot);
-
-bool isCurrentPlayerCheckmated(GameSnapshot *gameSnapshot);
-
 bool canPlay(GameSnapshot *gameSnapshot, Position origin, Position destination);
 
-bool canPlayWithoutBeingInCheck(GameSnapshot *gameSnapshot, Position origin, Position destination);
+bool canPromoteTo(GameSnapshot *gameSnapshot, Position origin, Piece promotion);
 
 bool canPromote(GameSnapshot *gameSnapshot, Position origin);
 
-bool canPromoteTo(GameSnapshot *gameSnapshot, Position origin, Piece promotion);
+bool isCurrentPlayerCheckmated(GameSnapshot *gameSnapshot);
+
+bool isCurrentPlayerStalemated(GameSnapshot *gameSnapshot);
+
+bool isPlayerInCheck(GameSnapshot *gameSnapshot, Color player);
+
+Position positionOfPiece(Piece board[COLS][ROWS], Piece piece);
+
+GameSnapshot initialGameSnapshot();
 
 ActionResult play(GameSnapshot *gameSnapshot, Position origin, Position destination);
 
 ActionResult promoteTo(GameSnapshot *gameSnapshot, Position origin, Piece promotion);
-
-void constructBoard(Piece board[COLS][ROWS]);
-
-void fillBoardWithInitialPieces(Piece board[COLS][ROWS]);
-
-GameSnapshot initialGameSnapshot();
 
 #endif //CORE_H

@@ -136,6 +136,14 @@ void moveTo(Piece board[COLS][ROWS], const Position origin, const Position desti
     board[origin.col][origin.row] = __;
 }
 
+Piece pieceAtColRow(Piece board[COLS][ROWS], const int col, const int row) {
+    return board[col][row];
+}
+
+Piece pieceAt(Piece board[COLS][ROWS], const Position position) {
+    return pieceAtColRow(board, position.col, position.row);
+}
+
 GameSnapshot appliedMove(const GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
     GameSnapshot nextGameSnapshot = {};
 
@@ -212,14 +220,6 @@ GameSnapshot appliedPromotion(const GameSnapshot *gameSnapshot, const Position o
     nextGameSnapshot.board[origin.col][origin.row] = promotion;
 
     return nextGameSnapshot;
-}
-
-Piece pieceAtColRow(Piece board[COLS][ROWS], const int col, const int row) {
-    return board[col][row];
-}
-
-Piece pieceAt(Piece board[COLS][ROWS], const Position position) {
-    return pieceAtColRow(board, position.col, position.row);
 }
 
 Position positionOfPiece(Piece board[COLS][ROWS], const Piece piece) {
@@ -425,6 +425,22 @@ bool isPlayerInCheck(GameSnapshot *gameSnapshot, const Color player) {
     return isPieceThreatened(gameSnapshot, kingPosition);
 }
 
+bool canPlayWithoutBeingInCheck(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
+    const Color pieceColorAtOrigin = pieceColor(pieceAt(gameSnapshot->board, origin));
+
+    if (pieceColorAtOrigin != gameSnapshot->currentPlayer) {
+        return false;
+    }
+
+    if (!isMoveValid(gameSnapshot, origin, destination)) {
+        return false;
+    }
+
+    GameSnapshot nextSnapshot = appliedMove(gameSnapshot, origin, destination);
+
+    return !isPlayerInCheck(&nextSnapshot, gameSnapshot->currentPlayer);
+}
+
 bool isCurrentPlayerStalemated(GameSnapshot *gameSnapshot) {
     Position origin = {-1, -1};
     Position destination = {-1, -1};
@@ -459,22 +475,6 @@ bool isCurrentPlayerStalemated(GameSnapshot *gameSnapshot) {
 
 bool isCurrentPlayerCheckmated(GameSnapshot *gameSnapshot) {
     return isCurrentPlayerStalemated(gameSnapshot) && isPlayerInCheck(gameSnapshot, gameSnapshot->currentPlayer);
-}
-
-bool canPlayWithoutBeingInCheck(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
-    const Color pieceColorAtOrigin = pieceColor(pieceAt(gameSnapshot->board, origin));
-
-    if (pieceColorAtOrigin != gameSnapshot->currentPlayer) {
-        return false;
-    }
-
-    if (!isMoveValid(gameSnapshot, origin, destination)) {
-        return false;
-    }
-
-    GameSnapshot nextSnapshot = appliedMove(gameSnapshot, origin, destination);
-
-    return !isPlayerInCheck(&nextSnapshot, gameSnapshot->currentPlayer);
 }
 
 bool canPlay(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
@@ -535,15 +535,15 @@ ActionResult promoteTo(GameSnapshot *gameSnapshot, const Position origin, const 
     return result;
 }
 
-void constructBoard(Piece board[COLS][ROWS]) {
+static void constructBoard(Piece board[COLS][ROWS]) {
     for (int col = 0; col < COLS; col++) {
         for (int row = 0; row < ROWS; row++) {
-            board[row][col] = __;
+            board[col][row] = __;
         }
     }
 }
 
-void fillBoardWithInitialPieces(Piece board[COLS][ROWS]) {
+static void fillBoardWithInitialPieces(Piece board[COLS][ROWS]) {
     constructBoard(board);
 
     board[0][0] = WR;
