@@ -1338,3 +1338,83 @@ TEST(promote, replace_pawn_by_promotion_piece) {
     ActionResult result = promoteTo(&gameSnapshot, origin, WQ);
     REQUIRE_TRUE(result.success);
 }
+
+TEST(isPlayerCheckmated, return_true_when_king_cannot_move) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, WK, __, BK},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, WR},
+        },
+        BLACK,
+        false,
+        false,
+    };
+
+    REQUIRE_TRUE(isCurrentPlayerCheckmated(&gameSnapshot));
+}
+
+TEST(isPlayerCheckmated, return_true_when_no_piece_can_move_to_protect_the_king) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, WR},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, WK, __, BK},
+            {__, __, __, __, __, __, __, BB},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, WR},
+        },
+        BLACK,
+        false,
+        false,
+    };
+
+    REQUIRE_TRUE(isCurrentPlayerCheckmated(&gameSnapshot));
+}
+
+TEST(isPlayerCheckmated, return_false_when_king_can_move) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, BK},
+            {__, __, __, __, __, WK, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, WR},
+        },
+        BLACK,
+        false,
+        false,
+    };
+
+    REQUIRE_FALSE(isCurrentPlayerCheckmated(&gameSnapshot));
+}
+
+TEST(isPlayerCheckmated, return_false_when_a_piece_can_move_to_protect_the_king) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, BK},
+            {__, __, __, __, __, __, __, WR},
+            {__, __, __, __, __, WQ, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        BLACK,
+        false,
+        false,
+    };
+
+    REQUIRE_FALSE(isCurrentPlayerCheckmated(&gameSnapshot));
+}

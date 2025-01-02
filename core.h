@@ -136,7 +136,11 @@ bool isPieceThreatened(const GameSnapshot *gameSnapshot, Position piece);
 
 bool isPlayerInCheck(GameSnapshot *gameSnapshot, Color player);
 
+bool isCurrentPlayerCheckmated(GameSnapshot *gameSnapshot);
+
 bool canPlay(GameSnapshot *gameSnapshot, Position origin, Position destination);
+
+bool canPlayWithoutBeingInCheck(GameSnapshot *gameSnapshot, Position origin, Position destination);
 
 bool canPromote(GameSnapshot *gameSnapshot, Position origin);
 

@@ -94,7 +94,7 @@ Piece askPromotion(GameSnapshot *gameSnapshot, const Position destination) {
 int main(void) {
     GameSnapshot gameSnapshot = initialGameSnapshot();
 
-    while (true) {
+    while (!isCurrentPlayerCheckmated(&gameSnapshot)) {
         renderBoard(gameSnapshot.board);
 
         bool isInvalid = true;
@@ -137,5 +137,10 @@ int main(void) {
             }
         } while (isInvalid);
     }
+
+    renderBoard(gameSnapshot.board);
+
+    printf("\n %s player is checkmated!", gameSnapshot.currentPlayer == WHITE ? "White" : "Black");
+
     return 0;
 }

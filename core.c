@@ -425,7 +425,44 @@ bool isPlayerInCheck(GameSnapshot *gameSnapshot, const Color player) {
     return isPieceThreatened(gameSnapshot, kingPosition);
 }
 
-bool canPlay(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
+bool isCurrentPlayerCheckmated(GameSnapshot *gameSnapshot) {
+    if (!isPlayerInCheck(gameSnapshot, gameSnapshot->currentPlayer)) {
+        return false;
+    }
+
+    Position origin = {-1, -1};
+    Position destination = {-1, -1};
+    Piece originPiece = __;
+
+    for (int originRow = 0; originRow < ROWS; originRow++) {
+        for (int originCol = 0; originCol < COLS; originCol++) {
+            origin.col = originCol;
+            origin.row = originRow;
+
+            originPiece = pieceAt(gameSnapshot->board, origin);
+
+            if (originPiece == __ && pieceColor(originPiece) != gameSnapshot->currentPlayer) {
+                continue;
+            }
+
+            for (int destinationRow = 0; destinationRow < ROWS; destinationRow++) {
+                for (int destinationCol = 0; destinationCol < COLS; destinationCol++) {
+                    destination.col = destinationCol;
+                    destination.row = destinationRow;
+
+                    if (canPlayWithoutBeingInCheck(gameSnapshot, origin, destination)) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+
+bool canPlayWithoutBeingInCheck(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
     const Color pieceColorAtOrigin = pieceColor(pieceAt(gameSnapshot->board, origin));
 
     if (pieceColorAtOrigin != gameSnapshot->currentPlayer) {
@@ -439,6 +476,10 @@ bool canPlay(GameSnapshot *gameSnapshot, const Position origin, const Position d
     GameSnapshot nextSnapshot = appliedMove(gameSnapshot, origin, destination);
 
     return !isPlayerInCheck(&nextSnapshot, gameSnapshot->currentPlayer);
+}
+
+bool canPlay(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
+    return canPlayWithoutBeingInCheck(gameSnapshot, origin, destination) && !isCurrentPlayerCheckmated(gameSnapshot);
 }
 
 bool canPromote(GameSnapshot *gameSnapshot, const Position origin) {
@@ -476,7 +517,6 @@ bool canPromoteTo(GameSnapshot *gameSnapshot, const Position origin, const Piece
            && pieceColor(promotion) == gameSnapshot->currentPlayer
            && isAPromotionPiece(promotion);
 }
-
 
 ActionResult play(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
     const ActionResult result = {
