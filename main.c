@@ -94,8 +94,22 @@ Piece askPromotion(GameSnapshot *gameSnapshot, const Position destination) {
 int main(void) {
     GameSnapshot gameSnapshot = initialGameSnapshot();
 
-    while (!isCurrentPlayerCheckmated(&gameSnapshot)) {
+    while (true) {
         renderBoard(gameSnapshot.board);
+
+        if (isCurrentPlayerCheckmated(&gameSnapshot)) {
+            printf(
+                "\n\n%s player is checkmated!\n%s won",
+                gameSnapshot.currentPlayer == WHITE ? "White" : "Black",
+                gameSnapshot.currentPlayer == WHITE ? "Black" : "White"
+            );
+            return 0;
+        }
+
+        if (isCurrentPlayerStalemated(&gameSnapshot)) {
+            printf("\n\n%s player is stalemated!\nNobody won", gameSnapshot.currentPlayer == WHITE ? "White" : "Black");
+            return 0;
+        }
 
         bool isInvalid = true;
         do {
@@ -108,9 +122,9 @@ int main(void) {
                 printf("\nYour are in check");
             }
 
-            printf("\nWhat piece do you move (in algebraic notation)? ");
+            printf("\nWhat piece do you move (in algebraic notation)?\n> ");
             scanf("%2s", originStr);
-            printf("\nWhere do you move it ? ");
+            printf("\nWhere do you move it ?\n> ");
             scanf("%2s", destinationStr);
 
             const Position origin = positionFromStr(originStr);
@@ -130,6 +144,7 @@ int main(void) {
                         gameSnapshot = playResult.gameSnapshot;
                     } else {
                         printf("\nError");
+                        return 1;
                     }
                 }
             } else {
@@ -137,10 +152,4 @@ int main(void) {
             }
         } while (isInvalid);
     }
-
-    renderBoard(gameSnapshot.board);
-
-    printf("\n %s player is checkmated!", gameSnapshot.currentPlayer == WHITE ? "White" : "Black");
-
-    return 0;
 }

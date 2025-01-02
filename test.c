@@ -1339,27 +1339,7 @@ TEST(promote, replace_pawn_by_promotion_piece) {
     REQUIRE_TRUE(result.success);
 }
 
-TEST(isPlayerCheckmated, return_true_when_king_cannot_move) {
-    GameSnapshot gameSnapshot = {
-        {
-            {__, __, __, __, __, __, __, __},
-            {__, __, __, __, __, __, __, __},
-            {__, __, __, __, __, __, __, __},
-            {__, __, __, __, __, WK, __, BK},
-            {__, __, __, __, __, __, __, __},
-            {__, __, __, __, __, __, __, __},
-            {__, __, __, __, __, __, __, __},
-            {__, __, __, __, __, __, __, WR},
-        },
-        BLACK,
-        false,
-        false,
-    };
-
-    REQUIRE_TRUE(isCurrentPlayerCheckmated(&gameSnapshot));
-}
-
-TEST(isPlayerCheckmated, return_true_when_no_piece_can_move_to_protect_the_king) {
+TEST(isCurrentPlayerCheckmated, return_true_when_king_is_in_check_but_cannot_move_and_no_piece_can_move_to_protect_the_king) {
     GameSnapshot gameSnapshot = {
         {
             {__, __, __, __, __, __, __, WR},
@@ -1379,7 +1359,7 @@ TEST(isPlayerCheckmated, return_true_when_no_piece_can_move_to_protect_the_king)
     REQUIRE_TRUE(isCurrentPlayerCheckmated(&gameSnapshot));
 }
 
-TEST(isPlayerCheckmated, return_false_when_king_can_move) {
+TEST(isCurrentPlayerCheckmated, return_false_when_king_can_move) {
     GameSnapshot gameSnapshot = {
         {
             {__, __, __, __, __, __, __, __},
@@ -1399,7 +1379,7 @@ TEST(isPlayerCheckmated, return_false_when_king_can_move) {
     REQUIRE_FALSE(isCurrentPlayerCheckmated(&gameSnapshot));
 }
 
-TEST(isPlayerCheckmated, return_false_when_a_piece_can_move_to_protect_the_king) {
+TEST(isCurrentPlayerCheckmated, return_false_when_a_piece_can_move_to_protect_the_king) {
     GameSnapshot gameSnapshot = {
         {
             {__, __, __, __, __, __, __, __},
@@ -1417,4 +1397,44 @@ TEST(isPlayerCheckmated, return_false_when_a_piece_can_move_to_protect_the_king)
     };
 
     REQUIRE_FALSE(isCurrentPlayerCheckmated(&gameSnapshot));
+}
+
+TEST(isCurrentPlayerStalemated, return_true_when_player_cannot_play_anything) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, BK},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, WQ, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        BLACK,
+        false,
+        false,
+    };
+
+    REQUIRE_TRUE(isCurrentPlayerStalemated(&gameSnapshot));
+}
+
+TEST(isCurrentPlayerStalemated, return_false_when_player_can_play_something) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, BP, __, __, BK},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, WQ, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        BLACK,
+        false,
+        false,
+    };
+
+    REQUIRE_FALSE(isCurrentPlayerStalemated(&gameSnapshot));
 }

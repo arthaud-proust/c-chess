@@ -425,11 +425,7 @@ bool isPlayerInCheck(GameSnapshot *gameSnapshot, const Color player) {
     return isPieceThreatened(gameSnapshot, kingPosition);
 }
 
-bool isCurrentPlayerCheckmated(GameSnapshot *gameSnapshot) {
-    if (!isPlayerInCheck(gameSnapshot, gameSnapshot->currentPlayer)) {
-        return false;
-    }
-
+bool isCurrentPlayerStalemated(GameSnapshot *gameSnapshot) {
     Position origin = {-1, -1};
     Position destination = {-1, -1};
     Piece originPiece = __;
@@ -461,6 +457,9 @@ bool isCurrentPlayerCheckmated(GameSnapshot *gameSnapshot) {
     return true;
 }
 
+bool isCurrentPlayerCheckmated(GameSnapshot *gameSnapshot) {
+    return isCurrentPlayerStalemated(gameSnapshot) && isPlayerInCheck(gameSnapshot, gameSnapshot->currentPlayer);
+}
 
 bool canPlayWithoutBeingInCheck(GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
     const Color pieceColorAtOrigin = pieceColor(pieceAt(gameSnapshot->board, origin));
