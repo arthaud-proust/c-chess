@@ -47,6 +47,17 @@ typedef enum {
     BP, // Black Pawn
 } Piece;
 
+typedef enum {
+    TOP_LEFT,
+    TOP,
+    TOP_RIGHT,
+    RIGHT,
+    BOTTOM_RIGHT,
+    BOTTOM,
+    BOTTOM_LEFT,
+    LEFT,
+} Direction;
+
 extern const int ROWS;
 extern const int COLS;
 
@@ -56,16 +67,27 @@ extern const int ASCII_ONE;
 const int WHITE_PAWN_ROW_PROMOTION;
 const int BLACK_PAWN_ROW_PROMOTION;
 
+const int WHITE_PAWN_START_ROW;
+const int WHITE_PAWN_START_JUMP_ROW;
+const int BLACK_PAWN_ROW_PROMOTION;
+const int BLACK_PAWN_ROW_PROMOTION;
+
 typedef struct {
     int col;
     int row;
 } Position;
 
 typedef struct {
+    Position origin;
+    Position destination;
+} Move;
+
+typedef struct {
     Piece board[8][8];
     Color currentPlayer;
     bool hasWhiteLostCastling;
     bool hasBlackLostCastling;
+    Move lastMove;
 } GameSnapshot;
 
 typedef struct {
@@ -87,6 +109,8 @@ const CastlingPositions WHITE_CASTLING_QUEEN_SIDE;
 const CastlingPositions BLACK_CASTLING_KING_SIDE;
 
 const CastlingPositions BLACK_CASTLING_QUEEN_SIDE;
+
+bool areSamePositions(const Position a, const Position b);
 
 bool canPlay(GameSnapshot *gameSnapshot, Position origin, Position destination);
 

@@ -39,6 +39,10 @@ TEST(all, cannot_move_other_color) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, BP);
 
@@ -71,6 +75,10 @@ TEST(all, cannot_move_piece_on_another_if_same_colour) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = {3, 2};
 
@@ -103,6 +111,10 @@ TEST(all, cannot_move_piece_out_of_board) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
 
@@ -140,6 +152,10 @@ TEST(all, cannot_move_if_it_put_king_in_check) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
 
@@ -171,6 +187,10 @@ TEST(pawn, white_can_move_1_cell_front_when_not_at_start_row) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
 
@@ -203,6 +223,10 @@ TEST(pawn, white_can_move_1_or_2_cells_front_when_at_start_row) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
 
@@ -235,6 +259,10 @@ TEST(pawn, white_cannot_move_2_cells_front_when_piece_in_front_of_it) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
 
@@ -267,6 +295,10 @@ TEST(pawn, white_can_eat_at_front_left_or_front_right) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
 
@@ -274,6 +306,42 @@ TEST(pawn, white_can_eat_at_front_left_or_front_right) {
         {0, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
+}
+
+TEST(pawn, white_can_eat_en_passant) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, BP, __, __, __},
+            {__, __, __, __, WP, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+        {
+            {0, 6},
+            {0, 4},
+        }
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
+
+    bool playableMoves[8][8] = {
+        {0, 0, 0, 0, 0, 1, 0, 0},
+        {0, 0, 0, 0, 0, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -299,6 +367,10 @@ TEST(pawn, black_can_move_1_cell_front_when_not_at_start_row) {
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, BP);
 
@@ -331,6 +403,10 @@ TEST(pawn, black_can_move_1_or_2_cells_front_when_at_start_row) {
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, BP);
 
@@ -363,6 +439,10 @@ TEST(pawn, black_cannot_move_2_cells_front_when_piece_in_front_of_it) {
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, BP);
 
@@ -395,6 +475,10 @@ TEST(pawn, black_can_eat_at_front_left_or_front_right) {
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, BP);
 
@@ -402,6 +486,42 @@ TEST(pawn, black_can_eat_at_front_left_or_front_right) {
         {0, 0, 0, 0, 1, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    ASSERT_PLAYABLE_MOVES_MATCH(&gameSnapshot, pieceToMove, playableMoves);
+}
+
+TEST(pawn, black_can_eat_en_passant) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, WP, __, __, __, __},
+            {__, __, __, BP, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        BLACK,
+        false,
+        false,
+        {
+            {0, 1},
+            {0, 3},
+        }
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, BP);
+
+    bool playableMoves[8][8] = {
+        {0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -427,6 +547,10 @@ TEST(pawn, dont_change_player_if_pawn_is_promoting) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
     const Position destination = positionOfPiece(gameSnapshot.board, BP);
@@ -451,6 +575,10 @@ TEST(knight, can_move_in_l_shape) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WN);
 
@@ -483,6 +611,10 @@ TEST(king, can_move_in_any_direction_at_distance_of_1) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
 
@@ -515,6 +647,10 @@ TEST(king, cannot_move_where_it_will_be_in_check) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
 
@@ -547,6 +683,10 @@ TEST(king, can_castle_kingside) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
     const Position destination = {6, 0};
@@ -607,6 +747,10 @@ TEST(king, cannot_castle_kingside_when_lost_castling) {
         WHITE,
         true,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
     const Position destination = {6, 0};
@@ -629,6 +773,10 @@ TEST(king, can_castle_queenside) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
     const Position destination = {2, 0};
@@ -705,6 +853,10 @@ TEST(king, cannot_castle_queenside_when_lost_castling) {
         WHITE,
         true,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
     const Position destination = {2, 0};
@@ -727,6 +879,10 @@ TEST(rook, can_move_in_column_or_row_at_any_distance) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WR);
 
@@ -759,6 +915,10 @@ TEST(rook, cannot_go_over_pieces) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WR);
 
@@ -791,6 +951,10 @@ TEST(bishop, can_move_in_diagonal_at_any_distance) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WB);
 
@@ -823,6 +987,10 @@ TEST(bishop, cannot_go_over_pieces) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WB);
 
@@ -855,6 +1023,10 @@ TEST(queen, can_move_in_column_or_row_or_diagonal_at_any_distance) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WQ);
 
@@ -887,6 +1059,10 @@ TEST(queen, cannot_go_over_pieces) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WQ);
 
@@ -919,6 +1095,10 @@ TEST(isPlayerInCheck, should_return_true_when_a_piece_can_eat_king) {
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
 
     REQUIRE_TRUE(isPlayerInCheck(&gameSnapshot, WHITE));
@@ -939,9 +1119,41 @@ TEST(isPlayerInCheck, should_return_false_when_none_piece_can_eat_king) {
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
 
     REQUIRE_FALSE(isPlayerInCheck(&gameSnapshot, WHITE));
+}
+
+TEST(play, save_current_move_as_last_move_in_next_snapshot) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WK, BP, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
+    };
+    Position origin = positionOfPiece(gameSnapshot.board, WK);
+    Position destination = positionOfPiece(gameSnapshot.board, BP);
+
+    ActionResult result = play(&gameSnapshot, origin, destination);
+    REQUIRE(areSamePositions(result.gameSnapshot.lastMove.origin, origin));
+    REQUIRE(areSamePositions(result.gameSnapshot.lastMove.destination, destination));
 }
 
 TEST(play, mark_castling_at_lost_if_king_moved) {
@@ -959,6 +1171,10 @@ TEST(play, mark_castling_at_lost_if_king_moved) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     Position origin = positionOfPiece(gameSnapshot.board, WK);
     Position destination = positionOfPiece(gameSnapshot.board, BR);
@@ -982,6 +1198,10 @@ TEST(play, mark_castling_at_lost_if_rook_moved) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     Position origin = positionOfPiece(gameSnapshot.board, WR);
     Position destination = positionOfPiece(gameSnapshot.board, BR);
@@ -1005,6 +1225,10 @@ TEST(play, do_not_change_lost_castling_if_king_and_rook_unmoved) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     Position origin = positionOfPiece(gameSnapshot.board, WP);
     Position destination = positionOfPiece(gameSnapshot.board, BP);
@@ -1028,6 +1252,10 @@ TEST(play, move_king_and_rook_when_castling_king_side) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     Position origin = positionOfPiece(gameSnapshot.board, WK);
     Position destination = {2, 0};
@@ -1053,6 +1281,10 @@ TEST(play, move_king_and_rook_when_castling_queen_side) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     Position origin = positionOfPiece(gameSnapshot.board, WK);
     Position destination = {6, 0};
@@ -1061,6 +1293,35 @@ TEST(play, move_king_and_rook_when_castling_queen_side) {
     REQUIRE_TRUE(result.success);
     REQUIRE_EQ(result.gameSnapshot.board[6][0], WK);
     REQUIRE_EQ(result.gameSnapshot.board[5][0], WR);
+}
+
+TEST(play, eat_pawn_en_passant) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, BP, __, __, __},
+            {__, __, __, __, WP, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+        {
+            {0, 6},
+            {0, 4},
+        }
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, WP);
+    const Position destination = {0, 5};
+
+    ActionResult result = play(&gameSnapshot, pieceToMove, destination);
+    CHECK_TRUE(result.success);
+    CHECK_EQ(result.gameSnapshot.board[0][4], __);
+    CHECK_EQ(result.gameSnapshot.board[0][5], WP);
 }
 
 TEST(canPromote, return_true_when_white_pawn_is_at_end_of_board) {
@@ -1078,6 +1339,10 @@ TEST(canPromote, return_true_when_white_pawn_is_at_end_of_board) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     Position origin = positionOfPiece(gameSnapshot.board, WP);
 
@@ -1099,6 +1364,10 @@ TEST(canPromote, return_true_when_black_pawn_is_at_end_of_board) {
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     Position origin = positionOfPiece(gameSnapshot.board, BP);
 
@@ -1120,6 +1389,10 @@ TEST(canPromoteTo, return_false_if_promoting_other_color) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     Position origin = positionOfPiece(gameSnapshot.board, WP);
 
@@ -1141,6 +1414,10 @@ TEST(promote, replace_pawn_by_promotion_piece) {
         WHITE,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
     Position origin = positionOfPiece(gameSnapshot.board, WP);
 
@@ -1163,6 +1440,10 @@ TEST(isCurrentPlayerCheckmated, return_true_when_king_is_in_check_but_cannot_mov
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
 
     REQUIRE_TRUE(isCurrentPlayerCheckmated(&gameSnapshot));
@@ -1183,6 +1464,10 @@ TEST(isCurrentPlayerCheckmated, return_false_when_king_can_move) {
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
 
     REQUIRE_FALSE(isCurrentPlayerCheckmated(&gameSnapshot));
@@ -1203,6 +1488,10 @@ TEST(isCurrentPlayerCheckmated, return_false_when_a_piece_can_move_to_protect_th
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
 
     REQUIRE_FALSE(isCurrentPlayerCheckmated(&gameSnapshot));
@@ -1223,6 +1512,10 @@ TEST(isCurrentPlayerStalemated, return_true_when_player_cannot_play_anything) {
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
 
     REQUIRE_TRUE(isCurrentPlayerStalemated(&gameSnapshot));
@@ -1243,6 +1536,10 @@ TEST(isCurrentPlayerStalemated, return_false_when_player_can_play_something) {
         BLACK,
         false,
         false,
+        {
+            {-1, -1},
+            {-1, -1},
+        }
     };
 
     REQUIRE_FALSE(isCurrentPlayerStalemated(&gameSnapshot));

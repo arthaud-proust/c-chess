@@ -14,6 +14,11 @@ const int ASCII_ONE = 49;
 const int WHITE_PAWN_ROW_PROMOTION = 7;
 const int BLACK_PAWN_ROW_PROMOTION = 0;
 
+const int WHITE_PAWN_START_ROW = 1;
+const int WHITE_PAWN_START_JUMP_ROW = 3;
+const int BLACK_PAWN_START_ROW = 6;
+const int BLACK_PAWN_START_JUMP_ROW = 4;
+
 const CastlingPositions WHITE_CASTLING_KING_SIDE = {
     {4, 0},
     {6, 0},
@@ -65,38 +70,43 @@ Position withSameCol(const Position position, const int row) {
     return newPosition;
 }
 
-Position atTopOf(const Position position, const int distance) {
-    const Position newPosition = {
+Position atDirection(const Position position, const Direction direction, const int distance) {
+    Position newPosition = {
         position.col,
-        position.row + distance
-    };
-
-    return newPosition;
-}
-
-Position atBottomOf(const Position position, const int distance) {
-    const Position newPosition = {
-        position.col,
-        position.row - distance
-    };
-
-    return newPosition;
-}
-
-Position atLeftOf(const Position position, const int distance) {
-    const Position newPosition = {
-        position.col - distance,
         position.row
     };
 
-    return newPosition;
-}
+    if (
+        direction == TOP_LEFT
+        || direction == TOP
+        || direction == TOP_RIGHT
+    ) {
+        newPosition.row += distance;
+    }
 
-Position atRightOf(const Position position, const int distance) {
-    const Position newPosition = {
-        position.col + distance,
-        position.row
-    };
+    if (
+        direction == BOTTOM_LEFT
+        || direction == BOTTOM
+        || direction == BOTTOM_RIGHT
+    ) {
+        newPosition.row -= distance;
+    }
+
+    if (
+        direction == BOTTOM_RIGHT
+        || direction == RIGHT
+        || direction == TOP_RIGHT
+    ) {
+        newPosition.col += distance;
+    }
+
+    if (
+        direction == BOTTOM_LEFT
+        || direction == LEFT
+        || direction == TOP_LEFT
+    ) {
+        newPosition.col -= distance;
+    }
 
     return newPosition;
 }
@@ -144,18 +154,61 @@ Piece pieceAt(Piece board[COLS][ROWS], const Position position) {
     return pieceAtColRow(board, position.col, position.row);
 }
 
-GameSnapshot appliedMove(const GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
-    GameSnapshot nextGameSnapshot = {};
+GameSnapshot copyOfGameSnapshot(const GameSnapshot *gameSnapshot) {
+    GameSnapshot copy = {};
 
     for (int col = 0; col < COLS; col++) {
         for (int row = 0; row < ROWS; row++) {
-            nextGameSnapshot.board[col][row] = gameSnapshot->board[col][row];
+            copy.board[col][row] = gameSnapshot->board[col][row];
         }
     }
 
+    copy.hasWhiteLostCastling = gameSnapshot->hasWhiteLostCastling;
+    copy.hasBlackLostCastling = gameSnapshot->hasBlackLostCastling;
+    copy.currentPlayer = gameSnapshot->currentPlayer;
+
+    return copy;
+}
+
+GameSnapshot appliedMove(const GameSnapshot *gameSnapshot, const Position origin, const Position destination) {
+    GameSnapshot nextGameSnapshot = copyOfGameSnapshot(gameSnapshot);
+
     const Piece pieceMoved = pieceAt(gameSnapshot->board, origin);
+    const Piece pieceAtDestination = pieceAt(gameSnapshot->board, destination);
 
     moveTo(nextGameSnapshot.board, origin, destination);
+
+    if (
+        pieceMoved == WP
+        && !pieceAtDestination
+        && origin.row == BLACK_PAWN_START_JUMP_ROW
+        && (
+            areSamePositions(destination, atDirection(origin, TOP_LEFT, 1))
+            || areSamePositions(destination, atDirection(origin, TOP_RIGHT, 1))
+        )
+        && pieceAt(gameSnapshot->board, gameSnapshot->lastMove.destination) == BP
+        && gameSnapshot->lastMove.origin.row == BLACK_PAWN_START_ROW
+        && gameSnapshot->lastMove.destination.row == BLACK_PAWN_START_JUMP_ROW
+        && destination.col == gameSnapshot->lastMove.destination.col
+    ) {
+        nextGameSnapshot.board[gameSnapshot->lastMove.destination.col][gameSnapshot->lastMove.destination.row] = __;
+    }
+
+    if (
+        pieceMoved == BP
+        && !pieceAtDestination
+        && origin.row == WHITE_PAWN_START_JUMP_ROW
+        && (
+            areSamePositions(destination, atDirection(origin, BOTTOM_LEFT, 1))
+            || areSamePositions(destination, atDirection(origin, BOTTOM_RIGHT, 1))
+        )
+        && pieceAt(gameSnapshot->board, gameSnapshot->lastMove.destination) == WP
+        && gameSnapshot->lastMove.origin.row == WHITE_PAWN_START_ROW
+        && gameSnapshot->lastMove.destination.row == WHITE_PAWN_START_JUMP_ROW
+        && destination.col == gameSnapshot->lastMove.destination.col
+    ) {
+        nextGameSnapshot.board[gameSnapshot->lastMove.destination.col][gameSnapshot->lastMove.destination.row] = __;
+    }
 
     if (
         pieceMoved == WK
@@ -189,9 +242,6 @@ GameSnapshot appliedMove(const GameSnapshot *gameSnapshot, const Position origin
         moveTo(nextGameSnapshot.board, BLACK_CASTLING_QUEEN_SIDE.rookOrigin, BLACK_CASTLING_QUEEN_SIDE.rookDestination);
     }
 
-    nextGameSnapshot.hasWhiteLostCastling = gameSnapshot->hasWhiteLostCastling;
-    nextGameSnapshot.hasBlackLostCastling = gameSnapshot->hasBlackLostCastling;
-
     if (pieceMoved == WK || pieceMoved == WR) {
         nextGameSnapshot.hasWhiteLostCastling = true;
     }
@@ -200,10 +250,12 @@ GameSnapshot appliedMove(const GameSnapshot *gameSnapshot, const Position origin
         nextGameSnapshot.hasBlackLostCastling = true;
     }
 
-    nextGameSnapshot.currentPlayer = gameSnapshot->currentPlayer;
     if (!canPromote(&nextGameSnapshot, destination)) {
         nextGameSnapshot.currentPlayer = gameSnapshot->currentPlayer == WHITE ? BLACK : WHITE;
     }
+
+    nextGameSnapshot.lastMove.origin = origin;
+    nextGameSnapshot.lastMove.destination = destination;
 
     return nextGameSnapshot;
 }
@@ -326,34 +378,64 @@ bool isMoveValid(const GameSnapshot *gameSnapshot, const Position origin, const 
 
     if (pieceAtOrigin == WP) {
         if (pieceAtDestination) {
-            return areSamePositions(destination, atLeftOf(atTopOf(origin, 1), 1))
-                   || areSamePositions(destination, atRightOf(atTopOf(origin, 1), 1));
+            return areSamePositions(destination, atDirection(origin, TOP_LEFT, 1))
+                   || areSamePositions(destination, atDirection(origin, TOP_RIGHT, 1));
         }
 
         if (
-            origin.row == 1
-            && areSamePositions(destination, atTopOf(origin, 2))
+            origin.row == WHITE_PAWN_START_ROW
+            && destination.row == WHITE_PAWN_START_JUMP_ROW
             && isColumnEmptyBetween(gameSnapshot->board, origin, destination)
         ) {
             return true;
         }
-        return areSamePositions(destination, atTopOf(origin, 1));
+
+        if (
+            origin.row == BLACK_PAWN_START_JUMP_ROW
+            && (
+                areSamePositions(destination, atDirection(origin, TOP_LEFT, 1))
+                || areSamePositions(destination, atDirection(origin, TOP_RIGHT, 1))
+            )
+            && pieceAt(gameSnapshot->board, gameSnapshot->lastMove.destination) == BP
+            && gameSnapshot->lastMove.origin.row == BLACK_PAWN_START_ROW
+            && gameSnapshot->lastMove.destination.row == BLACK_PAWN_START_JUMP_ROW
+            && destination.col == gameSnapshot->lastMove.destination.col
+        ) {
+            return true;
+        }
+
+        return areSamePositions(destination, atDirection(origin, TOP, 1));
     }
 
     if (pieceAtOrigin == BP) {
         if (pieceAtDestination) {
-            return areSamePositions(destination, atLeftOf(atBottomOf(origin, 1), 1))
-                   || areSamePositions(destination, atRightOf(atBottomOf(origin, 1), 1));
+            return areSamePositions(destination, atDirection(origin, BOTTOM_LEFT, 1))
+                   || areSamePositions(destination, atDirection(origin, BOTTOM_RIGHT, 1));
         }
 
         if (
-            origin.row == 6
-            && areSamePositions(destination, atBottomOf(origin, 2))
+            origin.row == BLACK_PAWN_START_ROW
+            && destination.row == BLACK_PAWN_START_JUMP_ROW
             && isColumnEmptyBetween(gameSnapshot->board, origin, destination)
         ) {
             return true;
         }
-        return areSamePositions(destination, atBottomOf(origin, 1));
+
+        if (
+            origin.row == WHITE_PAWN_START_JUMP_ROW
+            && (
+                areSamePositions(destination, atDirection(origin, BOTTOM_LEFT, 1))
+                || areSamePositions(destination, atDirection(origin, BOTTOM_RIGHT, 1))
+            )
+            && pieceAt(gameSnapshot->board, gameSnapshot->lastMove.destination) == WP
+            && gameSnapshot->lastMove.origin.row == WHITE_PAWN_START_ROW
+            && gameSnapshot->lastMove.destination.row == WHITE_PAWN_START_JUMP_ROW
+            && destination.col == gameSnapshot->lastMove.destination.col
+        ) {
+            return true;
+        }
+
+        return areSamePositions(destination, atDirection(origin, BOTTOM, 1));
     }
 
     if (pieceAtOrigin == WN || pieceAtOrigin == BN) {
