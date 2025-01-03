@@ -75,13 +75,20 @@ void renderBoard(Piece board[COLS][ROWS]) {
     printf("\n    a   b   c   d   e   f   g   h");
 }
 
-Position positionFromStr(const char str[2]) {
-    const Position position = {
-        (int) str[0] - ASCII_LOWER_A,
-        (int) str[1] - ASCII_ONE
+
+Move moveFromStr(const char str[4]) {
+    const Move move = {
+        {
+            (int) str[0] - ASCII_LOWER_A,
+            (int) str[1] - ASCII_ONE
+        },
+        {
+            (int) str[2] - ASCII_LOWER_A,
+            (int) str[3] - ASCII_ONE
+        },
     };
 
-    return position;
+    return move;
 }
 
 Piece askPromotion(GameSnapshot *gameSnapshot, const Position destination) {
@@ -124,8 +131,7 @@ int main(void) {
 
         bool isInvalid = true;
         do {
-            char originStr[3];
-            char destinationStr[3];
+            char moveStr[4 + 1];
 
             printf("\n\nIt's %s's turn", gameSnapshot.currentPlayer == WHITE ? "White" : "Black");
 
@@ -133,23 +139,20 @@ int main(void) {
                 printf("\nYour are in check");
             }
 
-            printf("\nWhat piece do you move (in algebraic notation)?\n> ");
-            scanf("%2s", originStr);
-            printf("\nWhere do you move it ?\n> ");
-            scanf("%2s", destinationStr);
+            printf("\nWhat do you play ? (e.g: d2d4)\n> ");
+            scanf("%4s", moveStr);
 
-            const Position origin = positionFromStr(originStr);
-            const Position destination = positionFromStr(destinationStr);
+            const Move move = moveFromStr(moveStr);
 
-            const ActionResult playResult = play(&gameSnapshot, origin, destination);
+            const ActionResult playResult = play(&gameSnapshot, move.origin, move.destination);
 
             if (playResult.success) {
                 isInvalid = false;
                 gameSnapshot = playResult.gameSnapshot;
 
-                if (canPromote(&gameSnapshot, destination)) {
-                    const Piece promotion = askPromotion(&gameSnapshot, destination);
-                    const ActionResult promoteResult = promoteTo(&gameSnapshot, destination, promotion);
+                if (canPromote(&gameSnapshot, move.destination)) {
+                    const Piece promotion = askPromotion(&gameSnapshot, move.destination);
+                    const ActionResult promoteResult = promoteTo(&gameSnapshot, move.destination, promotion);
 
                     if (promoteResult.success) {
                         gameSnapshot = playResult.gameSnapshot;
@@ -159,7 +162,7 @@ int main(void) {
                     }
                 }
             } else {
-                printf("\n%s -> %s is invalid! Please try again.", originStr, destinationStr);
+                printf("\n%s is invalid! Please try again.", moveStr);
             }
         } while (isInvalid);
     }
