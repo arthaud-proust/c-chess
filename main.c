@@ -34,6 +34,18 @@ const char *pieceIcon(const Piece piece) {
     return " ";
 }
 
+bool isOdd(const int x) {
+    return x % 2;
+}
+
+const char *caseIcon(Piece board[COLS][ROWS], const int col, const int row) {
+    if (board[col][row] == __) {
+        return (!isOdd(col) && !isOdd(row)) || (isOdd(col) && isOdd(row)) ? "◼" : " ";
+    }
+
+    return pieceIcon(board[col][row]);
+}
+
 Piece pieceFromChar(const Color color, const char pieceChar) {
     switch (pieceChar) {
         case 'K':
@@ -57,7 +69,7 @@ void renderBoard(Piece board[COLS][ROWS]) {
     for (int row = ROWS - 1; row >= 0; row--) {
         printf("\n%d", row + 1);
         for (int col = 0; col < COLS; col++) {
-            printf("   %s", pieceIcon(board[col][row]));
+            printf("   %s", caseIcon(board, col, row));
         }
     }
     printf("\n    a   b   c   d   e   f   g   h");
