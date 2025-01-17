@@ -124,9 +124,12 @@ bool isCurrentPlayerStalemated(GameSnapshot *gameSnapshot);
 
 bool isPlayerInCheck(GameSnapshot *gameSnapshot, Color player);
 
+bool isPieceThreatened(const GameSnapshot *gameSnapshot, const Position piece);
+
 Position positionOfPiece(Piece board[COLS][ROWS], Piece piece);
 
 GameSnapshot initialGameSnapshot();
+
 
 ActionResult play(GameSnapshot *gameSnapshot, Position origin, Position destination);
 

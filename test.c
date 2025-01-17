@@ -758,6 +758,72 @@ TEST(king, cannot_castle_kingside_when_lost_castling) {
     REQUIRE_FALSE(canPlay(&gameSnapshot, pieceToMove, destination));
 }
 
+TEST(king, cannot_castle_kingside_when_king_is_in_check) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WK, __, BR, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WR, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
+    const Position destination = {6, 0};
+
+    REQUIRE_FALSE(canPlay(&gameSnapshot, pieceToMove, destination));
+}
+
+TEST(king, cannot_castle_kingside_if_king_will_be_in_check) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WK, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, BR, __, __, __, __, __},
+            {WR, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
+    const Position destination = {6, 0};
+
+    REQUIRE_FALSE(canPlay(&gameSnapshot, pieceToMove, destination));
+}
+
+TEST(king, cannot_castle_kingside_if_king_will_go_trough_threatened_case) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WK, __, __, __, __, __, __, __},
+            {__, __, BR, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WR, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
+    const Position destination = {6, 0};
+
+    REQUIRE_FALSE(canPlay(&gameSnapshot, pieceToMove, destination));
+}
+
 TEST(king, can_castle_queenside) {
     GameSnapshot gameSnapshot = {
         {
@@ -857,6 +923,72 @@ TEST(king, cannot_castle_queenside_when_lost_castling) {
             {-1, -1},
             {-1, -1},
         }
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
+    const Position destination = {2, 0};
+
+    REQUIRE_FALSE(canPlay(&gameSnapshot, pieceToMove, destination));
+}
+
+TEST(king, cannot_castle_queenside_when_king_is_in_check) {
+    GameSnapshot gameSnapshot = {
+        {
+            {WR, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WK, __, BR, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
+    const Position destination = {2, 0};
+
+    REQUIRE_FALSE(canPlay(&gameSnapshot, pieceToMove, destination));
+}
+
+TEST(king, cannot_castle_queenside_if_king_will_be_in_check) {
+    GameSnapshot gameSnapshot = {
+        {
+            {WR, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, BR, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {WK, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+    };
+    const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
+    const Position destination = {2, 0};
+
+    REQUIRE_FALSE(canPlay(&gameSnapshot, pieceToMove, destination));
+}
+
+TEST(king, cannot_castle_queenside_if_king_will_go_trough_threatened_case) {
+    GameSnapshot gameSnapshot = {
+        {
+            {WR, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, BR, __, __, __, __, __},
+            {WK, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
     };
     const Position pieceToMove = positionOfPiece(gameSnapshot.board, WK);
     const Position destination = {2, 0};

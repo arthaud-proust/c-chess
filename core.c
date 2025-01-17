@@ -449,12 +449,24 @@ bool isMoveValid(const GameSnapshot *gameSnapshot, const Position origin, const 
         const CastlingPositions *queenSide = gameSnapshot->currentPlayer == WHITE ? &WHITE_CASTLING_QUEEN_SIDE : &BLACK_CASTLING_QUEEN_SIDE;
         const bool hasLostCastling = gameSnapshot->currentPlayer == WHITE ? gameSnapshot->hasWhiteLostCastling : gameSnapshot->hasBlackLostCastling;
 
-        if (areSamePositions(origin, kingSide->kingOrigin) && areSamePositions(destination, kingSide->kingDestination)) {
-            return !hasLostCastling && isRowEmptyBetween(gameSnapshot->board, kingSide->kingOrigin, kingSide->rookOrigin);
+        const bool isCastlingKingSide = areSamePositions(origin, kingSide->kingOrigin) && areSamePositions(destination, kingSide->kingDestination);
+        if (isCastlingKingSide) {
+            const GameSnapshot nextSnapshot = appliedMove(gameSnapshot, origin, destination);
+
+            return !hasLostCastling
+                   && isRowEmptyBetween(gameSnapshot->board, kingSide->kingOrigin, kingSide->rookOrigin)
+                   && !isPlayerInCheck(gameSnapshot, gameSnapshot->currentPlayer)
+                   && !isPieceThreatened(&nextSnapshot, kingSide->rookDestination);
         }
 
-        if (areSamePositions(origin, queenSide->kingOrigin) && areSamePositions(destination, queenSide->kingDestination)) {
-            return !hasLostCastling && isRowEmptyBetween(gameSnapshot->board, queenSide->kingOrigin, queenSide->rookOrigin);
+        const bool isCastlingQueenSide = areSamePositions(origin, queenSide->kingOrigin) && areSamePositions(destination, queenSide->kingDestination);
+        if (isCastlingQueenSide) {
+            const GameSnapshot nextSnapshot = appliedMove(gameSnapshot, origin, destination);
+
+            return !hasLostCastling
+                   && isRowEmptyBetween(gameSnapshot->board, queenSide->kingOrigin, queenSide->rookOrigin)
+                   && !isPlayerInCheck(gameSnapshot, gameSnapshot->currentPlayer)
+                   && !isPieceThreatened(&nextSnapshot, queenSide->rookDestination);
         }
 
         return rowsBetween(origin, destination) <= 1 && colsBetween(origin, destination) <= 1;
@@ -483,17 +495,17 @@ bool isPieceThreatened(const GameSnapshot *gameSnapshot, const Position piece) {
         return false;
     }
 
-    Position piecePosition = {-1, -1};
+    Position attacker = {-1, -1};
     for (int col = 0; col < COLS; col++) {
         for (int row = 0; row < ROWS; row++) {
-            piecePosition.col = col;
-            piecePosition.row = row;
+            attacker.col = col;
+            attacker.row = row;
 
-            if (areSamePositions(piece, piecePosition)) {
+            if (areSamePositions(piece, attacker)) {
                 continue;
             }
 
-            if (isMoveValid(gameSnapshot, piecePosition, piece)) {
+            if (isMoveValid(gameSnapshot, attacker, piece)) {
                 return true;
             }
         }
