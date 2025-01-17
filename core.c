@@ -270,6 +270,7 @@ GameSnapshot appliedPromotion(const GameSnapshot *gameSnapshot, const Position o
     }
 
     nextGameSnapshot.board[origin.col][origin.row] = promotion;
+    nextGameSnapshot.currentPlayer = gameSnapshot->currentPlayer == WHITE ? BLACK : WHITE;
 
     return nextGameSnapshot;
 }

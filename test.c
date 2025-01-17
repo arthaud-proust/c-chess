@@ -1425,6 +1425,34 @@ TEST(promote, replace_pawn_by_promotion_piece) {
     REQUIRE_TRUE(result.success);
 }
 
+TEST(promote, change_turn) {
+    GameSnapshot gameSnapshot = {
+        {
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, WP},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+            {__, __, __, __, __, __, __, __},
+        },
+        WHITE,
+        false,
+        false,
+        {
+                {-1, -1},
+                {-1, -1},
+            }
+    };
+    Position origin = positionOfPiece(gameSnapshot.board, WP);
+
+    ActionResult result = promoteTo(&gameSnapshot, origin, WQ);
+
+    REQUIRE(result.gameSnapshot.currentPlayer == BLACK);
+}
+
+
 TEST(isCurrentPlayerCheckmated, return_true_when_king_is_in_check_but_cannot_move_and_no_piece_can_move_to_protect_the_king) {
     GameSnapshot gameSnapshot = {
         {
