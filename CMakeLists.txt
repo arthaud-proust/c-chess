@@ -11,8 +11,19 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Tau)
 
-add_executable(chess main.c
-        core.c)
+add_executable(host main.c
+        core.c
+        socket.c
+        socket.h
+        ui.c
+        ui.h)
+
+add_executable(client main.c
+        core.c
+        socket.c
+        socket.h
+        ui.c
+        ui.h)
 
 enable_testing()
 
